@@ -169,9 +169,15 @@ def transGPSCallback(data):
     rospy.loginfo("x:" + str(data.point.x) + "  y:" +
                   str(data.point.y)+" lat:" + str(lat) + "  lon:" + str(lon))
 
+
 def getPathCallback(data):
     global current_path
-    current_path = data
+    current_path = data.poses
+
+    for i, point in enumerate(current_path):
+        print("%s %s %s\n" %
+              (point.pose.position.x, point.pose.position.y, point.pose.position.z))
+
 
 if __name__ == '__main__':
     try:
