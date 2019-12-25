@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/opt/ros/kinetic/include/**",
+                "/home/cyr/nav_ws/src/gps_mapping/include/**",
+                "/home/cyr/nav_ws/src/hdl_localization/include/**",
+                "/home/cyr/nav_ws/src/imu_serial/include/**",
+                "/home/cyr/nav_ws/src/ndt_omp/include/**",
+                "/usr/include/**"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

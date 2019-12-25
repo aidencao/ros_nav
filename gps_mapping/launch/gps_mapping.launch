@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="gps_mapping" type="point_marker.py" name="gps_mapping_node" output="screen">
+        <!-- 分别使用一号点和三号点进行标定 -->
+        <param name="x1" type="double" value="7.4204249382"/>
+        <param name="y1" type="double" value="-0.176393762231"/>
+        <param name="x2" type="double" value="74.8130569458"/>
+        <param name="y2" type="double" value="-78.4281463623"/>
+        <param name="lat1" type="double" value="30.7466829"/>
+        <param name="lon1" type="double" value="103.9286102"/>
+        <param name="lat2" type="double" value="30.7469452"/>
+        <param name="lon2" type="double" value="103.929043"/>
+    </node>
+</launch>

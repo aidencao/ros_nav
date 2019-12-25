@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/cyr/nav_ws/src/imu_serial/build/devel/setup.sh
