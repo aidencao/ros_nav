@@ -135,6 +135,7 @@ def initMenu():
     menu_handler.insert("显示巡航点信息", callback=menuShowPointsCallback)
     menu_handler.insert("设为导航起点", callback=menuSetStartCallback)
     menu_handler.insert("设为导航终点", callback=menuSetGoalCallback)
+    menu_handler.insert("生成GPS路径", callback=transGPSCallback)
 
 
 ##############################################################################
@@ -165,18 +166,18 @@ def checkParam(x1, x2, y1, y2, lat1, lat2, lon1, lon2):
 
 
 def transGPSCallback(data):
-    lat, lon = getGps(data.point.x, data.point.y)
-    rospy.loginfo("x:" + str(data.point.x) + "  y:" +
-                  str(data.point.y)+" lat:" + str(lat) + "  lon:" + str(lon))
+    global current_path
+
+    if current_path != False:
+        for i, point in enumerate(current_path):
+            lat, lon = getGps(point.pose.position.x, point.pose.position.y)
+            rospy.loginfo("x:" + str(point.pose.position.x) + "  y:" + str(point.pose.position.y) +
+                          "  z:" + str(point.pose.position.z)+" lat:" + str(lat) + "  lon:" + str(lon))
 
 
 def getPathCallback(data):
     global current_path
     current_path = data.poses
-
-    for i, point in enumerate(current_path):
-        print("%s %s %s\n" %
-              (point.pose.position.x, point.pose.position.y, point.pose.position.z))
 
 
 if __name__ == '__main__':
@@ -186,6 +187,7 @@ if __name__ == '__main__':
 
         # 定义全局变量
         global a_lat, b_lat, a_lon, b_lon, current_path
+        current_path = False
 
         # 获取标定点参数
         x1 = rospy.get_param("gps_mapping_node/x1", 2)
