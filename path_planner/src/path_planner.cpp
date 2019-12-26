@@ -34,6 +34,7 @@ private:
     std::shared_ptr<CollisionGeometryd> tree_obj;   //地图碰撞模型
     geometry_msgs::Point startp = geometry_msgs::Point();
     geometry_msgs::Point goalp = geometry_msgs::Point();
+    double step_range; //搜索步长
 
     //碰撞检测
     bool isCollisionFunction(const ob::State *state)
@@ -82,10 +83,10 @@ private:
 
 public:
     //构造方法
-    planner(void)
+    planner(double uavl, double uavw, double uavh, double octo_resolution, double bound_xy, double bound_lowz, double bound_highz, double steprange)
     {
-        Quadcopter = std::shared_ptr<CollisionGeometryd>(new fcl::Boxd(0.8, 0.8, 0.3));
-        OcTreed *tree = new OcTreed(std::shared_ptr<const octomap::OcTree>(new octomap::OcTree(5)));
+        Quadcopter = std::shared_ptr<CollisionGeometryd>(new fcl::Boxd(uavl, uavw, uavh));
+        OcTreed *tree = new OcTreed(std::shared_ptr<const octomap::OcTree>(new octomap::OcTree(octo_resolution)));
         tree_obj = std::shared_ptr<CollisionGeometryd>(tree);
 
         //解的状态空间
@@ -100,14 +101,17 @@ public:
         // 搜索的三维范围设置
         ob::RealVectorBounds bounds(3);
 
-        bounds.setLow(0, -8000);
-        bounds.setHigh(0, 8000);
-        bounds.setLow(1, -8000);
-        bounds.setHigh(1, 8000);
-        bounds.setLow(2, 0);
-        bounds.setHigh(2, 100);
+        bounds.setLow(0, -bound_xy);
+        bounds.setHigh(0, bound_xy);
+        bounds.setLow(1, -bound_xy);
+        bounds.setHigh(1, bound_xy);
+        bounds.setLow(2, bound_lowz);
+        bounds.setHigh(2, bound_highz);
 
         space->as<ob::SE3StateSpace>()->setBounds(bounds);
+
+        // 搜索步长
+        step_range = steprange;
 
         //初始化起点和终点
         si = ob::SpaceInformationPtr(new ob::SpaceInformation(space));
@@ -147,7 +151,7 @@ public:
     {
         // 创建规划器
         og::InformedRRTstar *rrt = new og::InformedRRTstar(si);
-        rrt->setRange(3); //设置步长
+        rrt->setRange(step_range); //设置步长
 
         ob::PlannerPtr plan(rrt);
 
@@ -327,7 +331,27 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "path_planner");
     ros::NodeHandle n;
-    planner planner_object;
+
+    // 定义参数
+    double uavl;
+    double uavw;
+    double uavh;
+    double octo_resolution;
+    double bound_xy;
+    double bound_lowz;
+    double bound_highz;
+    double step_range;
+    // 获取参数
+    n.param("path_planner/path", uavl, 0.8);
+    n.param("path_planner/path", uavw, 0.8);
+    n.param("path_planner/path", uavh, 0.3);
+    n.param("path_planner/path", octo_resolution, 5.0);
+    n.param("path_planner/path", bound_xy, 8000.0);
+    n.param("path_planner/path", bound_lowz, 0.0);
+    n.param("path_planner/path", bound_highz, 100.0);
+    n.param("path_planner/path", step_range, 3.0);
+
+    planner planner_object = planner(uavl, uavw, uavh, octo_resolution, bound_xy, bound_lowz, bound_highz, step_range);
 
     ros::Subscriber octree_sub = n.subscribe<octomap_msgs::Octomap>("/octomap_binary", 1, boost::bind(&octomapCallback, _1, &planner_object));
     ros::Subscriber goal_sub = n.subscribe<geometry_msgs::PointStamped>("/nav/goal", 1, boost::bind(&goalCb, _1, &planner_object));
