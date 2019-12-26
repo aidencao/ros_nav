@@ -342,14 +342,14 @@ int main(int argc, char **argv)
     double bound_highz;
     double step_range;
     // 获取参数
-    n.param("path_planner/uavl", uavl, 0.8);
-    n.param("path_planner/uavw", uavw, 0.8);
-    n.param("path_planner/uavh", uavh, 0.3);
-    n.param("path_planner/octo_resolution", octo_resolution, 5.0);
-    n.param("path_planner/bound_xy", bound_xy, 8000.0);
-    n.param("path_planner/bound_lowz", bound_lowz, 0.0);
-    n.param("path_planner/bound_highz", bound_highz, 100.0);
-    n.param("path_planner/step_range", step_range, 3.0);
+    n.param("path_planner_node/uavl", uavl, 0.8);
+    n.param("path_planner_node/uavw", uavw, 0.8);
+    n.param("path_planner_node/uavh", uavh, 0.3);
+    n.param("path_planner_node/octo_resolution", octo_resolution, 5.0);
+    n.param("path_planner_node/bound_xy", bound_xy, 8000.0);
+    n.param("path_planner_node/bound_lowz", bound_lowz, 0.0);
+    n.param("path_planner_node/bound_highz", bound_highz, 100.0);
+    n.param("path_planner_node/step_range", step_range, 3.0);
 
     planner planner_object = planner(uavl, uavw, uavh, octo_resolution, bound_xy, bound_lowz, bound_highz, step_range);
 
