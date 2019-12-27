@@ -173,6 +173,8 @@ def transGPSCallback(data):
             lat, lon = getGps(point.pose.position.x, point.pose.position.y)
             rospy.loginfo("x:" + str(point.pose.position.x) + "  y:" + str(point.pose.position.y) +
                           "  z:" + str(point.pose.position.z)+" lat:" + str(lat) + "  lon:" + str(lon))
+    else:
+        rospy.logwarn("当前还未有已生成的路径")
 
 
 def getPathCallback(data):
