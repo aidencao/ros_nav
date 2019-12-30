@@ -3,6 +3,7 @@
 import rospy
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import PointStamped
+from geometry_msgs.msg import Pose
 from nav_msgs.msg import Path
 from interactive_markers.interactive_marker_server import *
 from visualization_msgs.msg import *
@@ -136,6 +137,7 @@ def initMenu():
     menu_handler.insert("设为导航起点", callback=menuSetStartCallback)
     menu_handler.insert("设为导航终点", callback=menuSetGoalCallback)
     menu_handler.insert("生成GPS路径", callback=transGPSCallback)
+    menu_handler.insert("高度设为10", callback=testSet10)
 
 
 ##############################################################################
@@ -180,6 +182,16 @@ def transGPSCallback(data):
 def getPathCallback(data):
     global current_path
     current_path = data.poses
+
+###############################################################
+# 用于多点位导航标记
+
+# 测试直接设置高度的代码
+def testSet10(data):
+    pose = data.pose
+    pose.position.z = 10
+    server.setPose(data.marker_name, pose)
+    server.applyChanges()
 
 
 if __name__ == '__main__':
