@@ -30,12 +30,12 @@ def normalizeQuaternion(quaternion_msg):
 
 
 def createNewPoint(frame_id, x, y, seq):
-    global server, menu_handler
+    global server, menu_handler, point_count
 
     int_marker = InteractiveMarker()
     int_marker.header.frame_id = frame_id
-    int_marker.name = str(seq)
-    int_marker.description = str(seq)
+    int_marker.name = str(point_count)
+    int_marker.description = str(point_count)
     int_marker.pose.position.x = x
     int_marker.pose.position.y = y
 
@@ -69,21 +69,28 @@ def createNewPoint(frame_id, x, y, seq):
 
     server.insert(int_marker, moveFeedback)
 
-    menu_handler.apply(server, str(seq))
+    menu_handler.apply(server, str(point_count))
 
     server.applyChanges()
+    point_count = point_count + 1
 
 
 def showPointCallback(data):
     createNewPoint(data.header.frame_id,
                    data.pose.position.x, data.pose.position.y, data.header.seq)
 
-
+# 删除当前点
 def menuDeleteCallback(feedback):
     rospy.loginfo(feedback.marker_name)
     server.erase(feedback.marker_name)
     server.applyChanges()
 
+# 清空巡航点
+def menuResetPointsCallback(data):
+    global point_count
+    point_count = 0
+    server.clear()
+    server.applyChanges()
 
 def menuShowPointsCallback(feedback):
     for key in sorted(server.marker_contexts):
@@ -132,7 +139,8 @@ def menuSetGoalCallback(feedback):
 
 
 def initMenu():
-    menu_handler.insert("删除", callback=menuDeleteCallback)
+    # menu_handler.insert("删除", callback=menuDeleteCallback)
+    menu_handler.insert("重置巡航点", callback=menuResetPointsCallback)
     menu_handler.insert("显示巡航点信息", callback=menuShowPointsCallback)
     menu_handler.insert("设为导航起点", callback=menuSetStartCallback)
     menu_handler.insert("设为导航终点", callback=menuSetGoalCallback)
@@ -200,8 +208,9 @@ if __name__ == '__main__':
         rospy.loginfo("Starting point_marker")
 
         # 定义全局变量
-        global a_lat, b_lat, a_lon, b_lon, current_path
+        global a_lat, b_lat, a_lon, b_lon, current_path, point_count
         current_path = False
+        point_count = 0
 
         # 获取标定点参数
         x1 = rospy.get_param("gps_mapping_node/x1", 2)
