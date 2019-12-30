@@ -36,6 +36,47 @@ private:
     geometry_msgs::Point goalp = geometry_msgs::Point();
     double step_range; //搜索步长
 
+    // 连续碰撞检测
+    bool isContinuousCollisionFunction(geometry_msgs::PoseStamped pose)
+    {
+        // //检测
+        // Vector3d translation(pose.pose.position.x, pose.pose.position.y, pose.pose.position.z);
+        // Quaterniond rotation(pose.pose.orientation.w, pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z);
+        // Transform3d tree_tf_goal = treeObj.getTransform();
+        // Vector3d goal_translation(goalp.x, goalp.y, goalp.z);
+        // Transform3d aircraft_tf_goal = Transform3d::Identity();
+        // aircraft_tf_goal.translation() = goal_translation;
+
+        // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~" << result.is_collide << std::endl;
+
+        // return (!result.is_collide);
+        double current_x = pose.pose.position.x;
+        double current_y = pose.pose.position.y;
+        double current_z = pose.pose.position.z;
+
+        //设计检测步长
+        double distance = sqrt(pow((goalp.x - current_x), 2) + pow((goalp.y - current_y), 2) + pow((goalp.z - current_z), 2));
+        int count = distance / (step_range);
+        count++;
+
+        double step_x = (goalp.x - current_x) / count;
+        double step_y = (goalp.y - current_y) / count;
+        double step_z = (goalp.z - current_z) / count;
+
+        // 进行检测
+        for (int i = 0; i <= count; i++)
+        {
+            if (!isVailedPoint(current_x,current_y,current_z)){
+                return false;
+            }
+            current_x = current_x + step_x;
+            current_y = current_y + step_y;
+            current_z = current_z + step_z;
+        }
+
+        return true;
+    }
+
     //碰撞检测
     bool isCollisionFunction(const ob::State *state)
     {
@@ -150,8 +191,8 @@ public:
     void plan(void)
     {
         // 创建规划器
-        og::InformedRRTstar *rrt = new og::InformedRRTstar(si);
-        //og::RRTConnect *rrt = new og::RRTConnect(si);
+        //og::InformedRRTstar *rrt = new og::InformedRRTstar(si);
+        og::RRTConnect *rrt = new og::RRTConnect(si);
         rrt->setRange(step_range); //设置步长
 
         ob::PlannerPtr plan(rrt);
@@ -207,6 +248,32 @@ public:
                 pose.pose.orientation.w = rot->w;
 
                 msg.poses.push_back(pose);
+
+                if (isContinuousCollisionFunction(pose))
+                {
+                    path_idx = pth->getStateCount() - 1;
+                    const ob::SE3StateSpace::StateType *se3state = pth->getState(path_idx)->as<ob::SE3StateSpace::StateType>();
+
+                    // 生成路径的位置信息
+                    const ob::RealVectorStateSpace::StateType *pos = se3state->as<ob::RealVectorStateSpace::StateType>(0);
+
+                    // 生成路径的方向信息
+                    const ob::SO3StateSpace::StateType *rot = se3state->as<ob::SO3StateSpace::StateType>(1);
+
+                    geometry_msgs::PoseStamped pose_goal;
+
+                    pose_goal.pose.position.x = pos->values[0];
+                    pose_goal.pose.position.y = pos->values[1];
+                    pose_goal.pose.position.z = pos->values[2];
+
+                    pose_goal.pose.orientation.x = rot->x;
+                    pose_goal.pose.orientation.y = rot->y;
+                    pose_goal.pose.orientation.z = rot->z;
+                    pose_goal.pose.orientation.w = rot->w;
+
+                    msg.poses.push_back(pose_goal);
+                    break;
+                }
             }
             traj_pub.publish(msg);
 

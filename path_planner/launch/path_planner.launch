@@ -9,6 +9,6 @@
         <param name="bound_xy" type="double" value="8000.0"/>
         <param name="bound_lowz" type="double" value="0.0"/>
         <param name="bound_highz" type="double" value="100.0"/>
-        <param name="step_range" type="double" value="1.0"/>
+        <param name="step_range" type="double" value="3.0"/>
     </node>
 </launch>
