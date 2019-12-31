@@ -191,8 +191,8 @@ public:
     void plan(void)
     {
         // 创建规划器
-        //og::InformedRRTstar *rrt = new og::InformedRRTstar(si);
-        og::RRTConnect *rrt = new og::RRTConnect(si);
+        og::InformedRRTstar *rrt = new og::InformedRRTstar(si);
+        //og::RRTConnect *rrt = new og::RRTConnect(si);
         rrt->setRange(step_range); //设置步长
 
         ob::PlannerPtr plan(rrt);

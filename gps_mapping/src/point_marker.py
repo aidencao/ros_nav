@@ -3,7 +3,6 @@
 import rospy
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import PointStamped
-from geometry_msgs.msg import Pose
 from nav_msgs.msg import Path
 from interactive_markers.interactive_marker_server import *
 from visualization_msgs.msg import *
@@ -99,6 +98,9 @@ def menuShowPointsCallback(feedback):
               str(marker.pose.position.y) + " z:"+str(marker.pose.position.z))
     print("\n")
 
+# 发送巡航点
+def menuSendPointsCallback(data):
+    nav_path
 
 def menuSetStartCallback(feedback):
     global current_path
@@ -142,6 +144,7 @@ def initMenu():
     # menu_handler.insert("删除", callback=menuDeleteCallback)
     menu_handler.insert("重置巡航点", callback=menuResetPointsCallback)
     menu_handler.insert("显示巡航点信息", callback=menuShowPointsCallback)
+    menu_handler.insert("发送巡航点，进行路径规划", callback=menuSendPointsCallback)
     menu_handler.insert("设为导航起点", callback=menuSetStartCallback)
     menu_handler.insert("设为导航终点", callback=menuSetGoalCallback)
     menu_handler.insert("生成GPS路径", callback=transGPSCallback)
