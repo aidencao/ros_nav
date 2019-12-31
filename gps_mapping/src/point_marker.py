@@ -78,18 +78,19 @@ def showPointCallback(data):
     createNewPoint(data.header.frame_id,
                    data.pose.position.x, data.pose.position.y, data.header.seq)
 
-# 删除当前点
-def menuDeleteCallback(feedback):
+
+def menuDeleteCallback(feedback):  # 删除当前点
     rospy.loginfo(feedback.marker_name)
     server.erase(feedback.marker_name)
     server.applyChanges()
 
-# 清空巡航点
-def menuResetPointsCallback(data):
+
+def menuResetPointsCallback(data):  # 清空巡航点
     global point_count
     point_count = 0
     server.clear()
     server.applyChanges()
+
 
 def menuShowPointsCallback(feedback):
     for key in sorted(server.marker_contexts):
@@ -98,9 +99,6 @@ def menuShowPointsCallback(feedback):
               str(marker.pose.position.y) + " z:"+str(marker.pose.position.z))
     print("\n")
 
-# 发送巡航点
-def menuSendPointsCallback(data):
-    nav_path
 
 def menuSetStartCallback(feedback):
     global current_path
@@ -197,13 +195,35 @@ def getPathCallback(data):
 ###############################################################
 # 用于多点位导航标记
 
-# 测试直接设置高度的代码
-def testSet10(data):
+
+def testSet10(data):  # 测试直接设置高度的代码
     pose = data.pose
     pose.position.z = 10
     server.setPose(data.marker_name, pose)
     server.applyChanges()
 
+
+def menuSendPointsCallback(data):  # 发送巡航点
+    # 生成巡航点路径消息
+    nav_path = Path()
+    nav_path.header.stamp = rospy.Time.now()
+    nav_path.header.frame_id = "camera"
+
+    for key in sorted(server.marker_contexts):
+        marker = server.marker_contexts[key].int_marker
+        pose = PoseStamped()
+        pose.pose.position.x = marker.pose.position.x
+        pose.pose.position.y = marker.pose.position.y
+        pose.pose.position.z = marker.pose.position.z
+
+        pose.pose.orientation.x = marker.pose.orientation.x
+        pose.pose.orientation.y = marker.pose.orientation.y
+        pose.pose.orientation.z = marker.pose.orientation.z
+        pose.pose.orientation.w = marker.pose.orientation.w
+
+        nav_path.poses.append(pose)
+
+    nav_pub.publish(nav_path)
 
 if __name__ == '__main__':
     try:
@@ -239,6 +259,7 @@ if __name__ == '__main__':
             start_pub = rospy.Publisher(
                 'nav/start', PointStamped, queue_size=1)
             goal_pub = rospy.Publisher('nav/goal', PointStamped, queue_size=1)
+            nav_pub = rospy.Publisher("nav/waypoints", Path, queue_size=1)
 
             # 创建交互式标记服务，命名空间为nav_points
             server = InteractiveMarkerServer("nav_points")
