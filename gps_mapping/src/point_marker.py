@@ -55,16 +55,38 @@ def createNewPoint(frame_id, x, y, seq):
 
     int_marker.controls.append(box_control)
 
-    move_control = InteractiveMarkerControl()
-    move_control.orientation.w = 1
-    move_control.orientation.x = 0
-    move_control.orientation.y = 1
-    move_control.orientation.z = 0
-    normalizeQuaternion(move_control.orientation)
-    move_control.name = "move_z"
-    move_control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
+    move_control_x = InteractiveMarkerControl()
+    move_control_x.orientation.w = 1
+    move_control_x.orientation.x = 1
+    move_control_x.orientation.y = 0
+    move_control_x.orientation.z = 0
+    normalizeQuaternion(move_control_x.orientation)
+    move_control_x.name = "move_x"
+    move_control_x.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
 
-    int_marker.controls.append(move_control)
+    int_marker.controls.append(move_control_x)
+
+    move_control_y = InteractiveMarkerControl()
+    move_control_y.orientation.w = 1
+    move_control_y.orientation.x = 0
+    move_control_y.orientation.y = 0
+    move_control_y.orientation.z = 1
+    normalizeQuaternion(move_control_y.orientation)
+    move_control_y.name = "move_y"
+    move_control_y.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
+
+    int_marker.controls.append(move_control_y)
+
+    move_control_z = InteractiveMarkerControl()
+    move_control_z.orientation.w = 1
+    move_control_z.orientation.x = 0
+    move_control_z.orientation.y = 1
+    move_control_z.orientation.z = 0
+    normalizeQuaternion(move_control_z.orientation)
+    move_control_z.name = "move_z"
+    move_control_z.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
+
+    int_marker.controls.append(move_control_z)
 
     server.insert(int_marker, moveFeedback)
 
@@ -254,12 +276,12 @@ if __name__ == '__main__':
             rospy.Subscriber("goal", PoseStamped,
                              showPointCallback, queue_size=1)
 
-            rospy.Subscriber("waypoints", Path, getPathCallback, queue_size=1)
+            rospy.Subscriber("nav/waypoints", Path, getPathCallback, queue_size=1)
 
             start_pub = rospy.Publisher(
                 'nav/start', PointStamped, queue_size=1)
             goal_pub = rospy.Publisher('nav/goal', PointStamped, queue_size=1)
-            nav_pub = rospy.Publisher("nav/waypoints", Path, queue_size=1)
+            nav_pub = rospy.Publisher("path/waypoints", Path, queue_size=1)
 
             # 创建交互式标记服务，命名空间为nav_points
             server = InteractiveMarkerServer("nav_points")
