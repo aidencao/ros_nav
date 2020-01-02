@@ -13,8 +13,11 @@ menu_handler = MenuHandler()
 
 def moveFeedback(feedback):
     p = feedback.pose.position
-    print feedback.marker_name + " is now at " + \
-        str(p.x) + ", " + str(p.y) + ", " + str(p.z)
+    marker = server.get(feedback.marker_name)
+    lat, lon = getGps(p.x, p.y)
+    marker.description = "id:" + str(feedback.marker_name) + " x:"+str(p.x) + " y:" + \
+        str(p.y) + " z:" + str(p.z) + " lat:" + str(lat) + "  lon:" + str(lon)
+    server.insert(marker)
     server.applyChanges()
 
 
@@ -34,15 +37,19 @@ def createNewPoint(frame_id, x, y, seq):
     int_marker = InteractiveMarker()
     int_marker.header.frame_id = frame_id
     int_marker.name = str(point_count)
-    int_marker.description = str(point_count)
+    lat, lon = getGps(x, y)
+    int_marker.description = "id:" + str(point_count) + " x:"+str(x) + " y:" + \
+        str(y) + " z:" + str(0) + " lat:" + str(lat) + "  lon:" + str(lon)
+
     int_marker.pose.position.x = x
     int_marker.pose.position.y = y
+    int_marker.scale = 4.5
 
     box_marker = Marker()
     box_marker.type = Marker.CUBE
-    box_marker.scale.x = 0.45
-    box_marker.scale.y = 0.45
-    box_marker.scale.z = 0.45
+    box_marker.scale.x = 3
+    box_marker.scale.y = 3
+    box_marker.scale.z = 3
     box_marker.color.r = 0.0
     box_marker.color.g = 0.5
     box_marker.color.b = 0.5
@@ -101,10 +108,10 @@ def showPointCallback(data):
                    data.pose.position.x, data.pose.position.y, data.header.seq)
 
 
-def menuDeleteCallback(feedback):  # 删除当前点
-    rospy.loginfo(feedback.marker_name)
-    server.erase(feedback.marker_name)
-    server.applyChanges()
+# def menuDeleteCallback(feedback):  # 删除当前点
+#     rospy.loginfo(feedback.marker_name)
+#     server.erase(feedback.marker_name)
+#     server.applyChanges()
 
 
 def menuResetPointsCallback(data):  # 清空巡航点
@@ -122,42 +129,42 @@ def menuShowPointsCallback(feedback):
     print("\n")
 
 
-def menuSetStartCallback(feedback):
-    global current_path
-    p = feedback.pose.position
+# def menuSetStartCallback(feedback):
+#     global current_path
+#     p = feedback.pose.position
 
-    point = PointStamped()
-    point.header.frame_id = "camera"
-    point.header.stamp = rospy.Time.now()
-    point.point.x = p.x
-    point.point.y = p.y
-    point.point.z = p.z
+#     point = PointStamped()
+#     point.header.frame_id = "camera"
+#     point.header.stamp = rospy.Time.now()
+#     point.point.x = p.x
+#     point.point.y = p.y
+#     point.point.z = p.z
 
-    current_path = False
+#     current_path = False
 
-    start_pub.publish(point)
+#     start_pub.publish(point)
 
-    print feedback.marker_name + " is now at " + \
-        str(p.x) + ", " + str(p.y) + ", " + str(p.z) + ", 设为起点"
+#     print feedback.marker_name + " is now at " + \
+#         str(p.x) + ", " + str(p.y) + ", " + str(p.z) + ", 设为起点"
 
 
-def menuSetGoalCallback(feedback):
-    global current_path
-    p = feedback.pose.position
+# def menuSetGoalCallback(feedback):
+#     global current_path
+#     p = feedback.pose.position
 
-    point = PointStamped()
-    point.header.frame_id = "camera"
-    point.header.stamp = rospy.Time.now()
-    point.point.x = p.x
-    point.point.y = p.y
-    point.point.z = p.z
+#     point = PointStamped()
+#     point.header.frame_id = "camera"
+#     point.header.stamp = rospy.Time.now()
+#     point.point.x = p.x
+#     point.point.y = p.y
+#     point.point.z = p.z
 
-    current_path = False
+#     current_path = False
 
-    goal_pub.publish(point)
+#     goal_pub.publish(point)
 
-    print feedback.marker_name + " is now at " + \
-        str(p.x) + ", " + str(p.y) + ", " + str(p.z) + ", 设为终点"
+#     print feedback.marker_name + " is now at " + \
+#         str(p.x) + ", " + str(p.y) + ", " + str(p.z) + ", 设为终点"
 
 
 def initMenu():
@@ -222,6 +229,10 @@ def testSet10(data):  # 测试直接设置高度的代码
     pose = data.pose
     pose.position.z = 10
     server.setPose(data.marker_name, pose)
+
+    marker = server.get(data.marker_name)
+    marker.description = "xxxxxxxxxxxxxx"
+    server.insert(marker)
     server.applyChanges()
 
 
@@ -246,6 +257,7 @@ def menuSendPointsCallback(data):  # 发送巡航点
         nav_path.poses.append(pose)
 
     nav_pub.publish(nav_path)
+
 
 if __name__ == '__main__':
     try:
@@ -276,7 +288,8 @@ if __name__ == '__main__':
             rospy.Subscriber("goal", PoseStamped,
                              showPointCallback, queue_size=1)
 
-            rospy.Subscriber("nav/waypoints", Path, getPathCallback, queue_size=1)
+            rospy.Subscriber("nav/waypoints", Path,
+                             getPathCallback, queue_size=1)
 
             # start_pub = rospy.Publisher(
             #     'nav/start', PointStamped, queue_size=1)
