@@ -164,7 +164,7 @@ Visualization Manager:
       Radius: 0.0299999993
       Shaft Diameter: 0.100000001
       Shaft Length: 0.100000001
-      Topic: /waypoints
+      Topic: /nav/waypoints
       Unreliable: false
       Value: true
   Enabled: true
@@ -192,25 +192,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 43.7983284
+      Distance: 121.456207
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -4.80898857
-        Y: -12.5122366
-        Z: 21.063343
+        X: -106.172028
+        Y: -33.2372437
+        Z: -48.3580742
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.979796052
+      Pitch: 0.629796088
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.3482089
+      Yaw: 3.34320927
     Saved: ~
 Window Geometry:
   Displays:

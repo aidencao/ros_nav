@@ -226,7 +226,7 @@ public:
     }
 
     //进行路径规划
-    void plan(void)
+    bool plan(nav_msgs::Path &msg)
     {
         // 创建规划器
         og::InformedRRTstar *rrt = new og::InformedRRTstar(si);
@@ -260,7 +260,6 @@ public:
             pth->printAsMatrix(std::cout);
 
             //生成路径消息
-            nav_msgs::Path msg;
             msg.header.stamp = ros::Time::now();
             msg.header.frame_id = "camera";
 
@@ -313,16 +312,19 @@ public:
                     break;
                 }
             }
-            traj_pub.publish(msg);
+            //traj_pub.publish(msg);
 
             //完成后重置问题实例状态
             pdef->clearSolutionPaths();
             replan_flag = false;
+
+            return true;
         }
         else
         {
             pdef->clearSolutionPaths();
-            std::cout << "没有找到相应的路径" << std::endl;
+            //std::cout << "没有找到相应的路径" << std::endl;
+            return false;
         }
     }
 
@@ -331,7 +333,9 @@ public:
     {
         std::cout << "路径总点数:" << pth->getStateCount() << std::endl;
         if (pth->getStateCount() <= 2)
-            plan();
+        {
+            //plan();
+        }
         else
         {
             for (std::size_t idx = 0; idx < pth->getStateCount(); idx++)
@@ -342,7 +346,9 @@ public:
                     break;
             }
             if (replan_flag)
-                plan();
+            {
+                //plan();
+            }
             else
                 // 每个点都没有碰撞
                 std::cout << "不需要重新规划" << std::endl;
@@ -356,66 +362,103 @@ public:
 
     bool setStart(double x, double y, double z)
     {
-        if (x == goalp.x && y == goalp.y && z == goalp.z)
-        {
-            std::cout << "起点与终点重合，请重新选择" << std::endl;
-            return false;
-        }
+        // if (x == goalp.x && y == goalp.y && z == goalp.z)
+        // {
+        //     std::cout << "起点与终点重合，请重新选择" << std::endl;
+        //     return false;
+        // }
 
-        if (isVailedPoint(x, y, z))
-        {
-            ob::ScopedState<ob::SE3StateSpace> start(space);
-            start->setXYZ(x, y, z);
-            startp.x = x;
-            startp.y = y;
-            startp.z = z;
-            start->as<ob::SO3StateSpace::StateType>(1)->setIdentity();
-            pdef->clearStartStates();
-            pdef->addStartState(start);
-            std::cout << "起点设置为: " << x << " " << y << " " << z << std::endl;
-            return true;
-        }
-        else
-        {
-            std::cout << "该点不在自由空间内，请重新选择" << std::endl;
-            return false;
-        }
+        // if (isVailedPoint(x, y, z))
+        // {
+        //     ob::ScopedState<ob::SE3StateSpace> start(space);
+        //     start->setXYZ(x, y, z);
+        //     startp.x = x;
+        //     startp.y = y;
+        //     startp.z = z;
+        //     start->as<ob::SO3StateSpace::StateType>(1)->setIdentity();
+        //     pdef->clearStartStates();
+        //     pdef->addStartState(start);
+        //     std::cout << "起点设置为: " << x << " " << y << " " << z << std::endl;
+        //     return true;
+        // }
+        // else
+        // {
+        //     std::cout << "该点不在自由空间内，请重新选择" << std::endl;
+        //     return false;
+        // }
+
+        ob::ScopedState<ob::SE3StateSpace> start(space);
+        start->setXYZ(x, y, z);
+        startp.x = x;
+        startp.y = y;
+        startp.z = z;
+        start->as<ob::SO3StateSpace::StateType>(1)->setIdentity();
+        pdef->clearStartStates();
+        pdef->addStartState(start);
     }
 
     bool setGoal(double x, double y, double z)
     {
-        if (x == startp.x && y == startp.y && z == startp.z)
-        {
-            std::cout << "起点与终点重合，请重新选择" << std::endl;
-            return false;
-        }
+        // if (x == startp.x && y == startp.y && z == startp.z)
+        // {
+        //     std::cout << "起点与终点重合，请重新选择" << std::endl;
+        //     return false;
+        // }
 
-        if (isVailedPoint(x, y, z))
-        {
-            ob::ScopedState<ob::SE3StateSpace> goal(space);
-            goal->setXYZ(x, y, z);
-            goalp.x = x;
-            goalp.y = y;
-            goalp.z = z;
-            goal->as<ob::SO3StateSpace::StateType>(1)->setIdentity();
-            pdef->clearGoal();
-            pdef->setGoalState(goal);
-            std::cout << "终点设置为: " << x << " " << y << " " << z << std::endl;
-            return true;
-        }
-        else
-        {
-            std::cout << "该点不在自由空间内，请重新选择" << std::endl;
-            return false;
-        }
+        // if (isVailedPoint(x, y, z))
+        // {
+        //     ob::ScopedState<ob::SE3StateSpace> goal(space);
+        //     goal->setXYZ(x, y, z);
+        //     goalp.x = x;
+        //     goalp.y = y;
+        //     goalp.z = z;
+        //     goal->as<ob::SO3StateSpace::StateType>(1)->setIdentity();
+        //     pdef->clearGoal();
+        //     pdef->setGoalState(goal);
+        //     std::cout << "终点设置为: " << x << " " << y << " " << z << std::endl;
+        //     return true;
+        // }
+        // else
+        // {
+        //     std::cout << "该点不在自由空间内，请重新选择" << std::endl;
+        //     return false;
+        // }
+        ob::ScopedState<ob::SE3StateSpace> goal(space);
+        goal->setXYZ(x, y, z);
+        goalp.x = x;
+        goalp.y = y;
+        goalp.z = z;
+        goal->as<ob::SO3StateSpace::StateType>(1)->setIdentity();
+        pdef->clearGoal();
+        pdef->setGoalState(goal);
     }
 
     // 多点路径的规划
-    bool waypointsPlan(const nav_msgs::Path::ConstPtr &msg)
+    void waypointsPlan(const nav_msgs::Path::ConstPtr &msg)
     {
         if (isVailedWaypoints(msg))
         {
-            
+            nav_msgs::Path nav_path_msg;
+            for (int i = 0; i < msg->poses.size() - 1; ++i)
+            {
+                geometry_msgs::Point start_position = msg->poses[i].pose.position;
+                geometry_msgs::Point goal_position = msg->poses[i + 1].pose.position;
+                setStart(start_position.x, start_position.y, start_position.z);
+                setGoal(goal_position.x, goal_position.y, goal_position.z);
+                if (!plan(nav_path_msg))
+                {
+                    std::cout << "路径点" << i << "与" << i + 1 << "之间寻找路径失败"
+                              << std::endl;
+                    return;
+                }
+
+                // 去除重复终点
+                if (i < msg->poses.size() - 2)
+                {
+                    nav_path_msg.poses.pop_back();
+                }
+            }
+            traj_pub.publish(nav_path_msg);
         }
     }
 };
@@ -430,17 +473,21 @@ void octomapCallback(const octomap_msgs::Octomap::ConstPtr &msg, planner *planne
     //planner_ptr->plan();
 }
 
-void startCb(const geometry_msgs::PointStamped::ConstPtr &msg, planner *planner_ptr)
-{
-    if (planner_ptr->setStart(msg->point.x, msg->point.y, msg->point.z))
-        planner_ptr->plan();
-}
+// void startCb(const geometry_msgs::PointStamped::ConstPtr &msg, planner *planner_ptr)
+// {
+//     if (planner_ptr->setStart(msg->point.x, msg->point.y, msg->point.z))
+//     {
+//     }
+//     //planner_ptr->plan();
+// }
 
-void goalCb(const geometry_msgs::PointStamped::ConstPtr &msg, planner *planner_ptr)
-{
-    if (planner_ptr->setGoal(msg->point.x, msg->point.y, msg->point.z))
-        planner_ptr->plan();
-}
+// void goalCb(const geometry_msgs::PointStamped::ConstPtr &msg, planner *planner_ptr)
+// {
+//     if (planner_ptr->setGoal(msg->point.x, msg->point.y, msg->point.z))
+//     {
+//     }
+//     //planner_ptr->plan();
+// }
 
 // 接收标点功能发来的路径信息
 void pathCb(const nav_msgs::Path::ConstPtr &msg, planner *planner_ptr)
@@ -475,8 +522,8 @@ int main(int argc, char **argv)
     planner planner_object = planner(uavl, uavw, uavh, octo_resolution, bound_xy, bound_lowz, bound_highz, step_range);
 
     ros::Subscriber octree_sub = n.subscribe<octomap_msgs::Octomap>("/octomap_binary", 1, boost::bind(&octomapCallback, _1, &planner_object));
-    ros::Subscriber goal_sub = n.subscribe<geometry_msgs::PointStamped>("/nav/goal", 1, boost::bind(&goalCb, _1, &planner_object));
-    ros::Subscriber start_sub = n.subscribe<geometry_msgs::PointStamped>("/nav/start", 1, boost::bind(&startCb, _1, &planner_object));
+    //ros::Subscriber goal_sub = n.subscribe<geometry_msgs::PointStamped>("/nav/goal", 1, boost::bind(&goalCb, _1, &planner_object));
+    //ros::Subscriber start_sub = n.subscribe<geometry_msgs::PointStamped>("/nav/start", 1, boost::bind(&startCb, _1, &planner_object));
     ros::Subscriber path_sub = n.subscribe<nav_msgs::Path>("/path/waypoints", 1, boost::bind(&pathCb, _1, &planner_object));
 
     traj_pub = n.advertise<nav_msgs::Path>("/nav/waypoints", 1);

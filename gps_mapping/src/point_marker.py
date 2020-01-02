@@ -165,8 +165,8 @@ def initMenu():
     menu_handler.insert("重置巡航点", callback=menuResetPointsCallback)
     menu_handler.insert("显示巡航点信息", callback=menuShowPointsCallback)
     menu_handler.insert("发送巡航点，进行路径规划", callback=menuSendPointsCallback)
-    menu_handler.insert("设为导航起点", callback=menuSetStartCallback)
-    menu_handler.insert("设为导航终点", callback=menuSetGoalCallback)
+    # menu_handler.insert("设为导航起点", callback=menuSetStartCallback)
+    # menu_handler.insert("设为导航终点", callback=menuSetGoalCallback)
     menu_handler.insert("生成GPS路径", callback=transGPSCallback)
     menu_handler.insert("高度设为10", callback=testSet10)
 
@@ -278,9 +278,9 @@ if __name__ == '__main__':
 
             rospy.Subscriber("nav/waypoints", Path, getPathCallback, queue_size=1)
 
-            start_pub = rospy.Publisher(
-                'nav/start', PointStamped, queue_size=1)
-            goal_pub = rospy.Publisher('nav/goal', PointStamped, queue_size=1)
+            # start_pub = rospy.Publisher(
+            #     'nav/start', PointStamped, queue_size=1)
+            # goal_pub = rospy.Publisher('nav/goal', PointStamped, queue_size=1)
             nav_pub = rospy.Publisher("path/waypoints", Path, queue_size=1)
 
             # 创建交互式标记服务，命名空间为nav_points
