@@ -66,7 +66,8 @@ private:
         // 进行检测
         for (int i = 0; i <= count; i++)
         {
-            if (!isVailedPoint(current_x,current_y,current_z)){
+            if (!isVailedPoint(current_x, current_y, current_z))
+            {
                 return false;
             }
             current_x = current_x + step_x;
@@ -112,6 +113,43 @@ private:
         collide(&aircraftObject, &treeObj, requestType, collisionResult);
 
         return (!collisionResult.isCollision());
+    }
+
+    //检测导航路径合法性
+    bool isVailedWaypoints(const nav_msgs::Path::ConstPtr &msg)
+    {
+        int size = msg->poses.size();
+        if (size < 2)
+        {
+            std::cout << "路径点数量小于2，请检查 " << std::endl;
+            return false;
+        }
+        for (int i = 0; i < size - 1; ++i)
+        {
+            geometry_msgs::Point start_position = msg->poses[i].pose.position;
+            geometry_msgs::Point goal_position = msg->poses[i + 1].pose.position;
+            if (start_position.x == goal_position.x && start_position.y == goal_position.y && start_position.z == goal_position.z)
+            {
+                std::cout << "路径点" << i << "与" << i + 1 << "重合"
+                          << "，请检查 " << std::endl;
+                return false;
+            }
+
+            if (!isVailedPoint(start_position.x, start_position.y, start_position.z))
+            {
+                std::cout << "路径点" << i << "不在自由空间内，请检查重新选择" << std::endl;
+                return false;
+            }
+        }
+
+        geometry_msgs::Point end_position = msg->poses[size - 1].pose.position;
+        if (!isVailedPoint(end_position.x, end_position.y, end_position.z))
+        {
+            std::cout << "路径点" << size - 1 << "不在自由空间内，请检查重新选择" << std::endl;
+            return false;
+        }
+        else
+            return true;
     }
 
     //优化路径
@@ -371,6 +409,15 @@ public:
             return false;
         }
     }
+
+    // 多点路径的规划
+    bool waypointsPlan(const nav_msgs::Path::ConstPtr &msg)
+    {
+        if (isVailedWaypoints(msg))
+        {
+            
+        }
+    }
 };
 
 void octomapCallback(const octomap_msgs::Octomap::ConstPtr &msg, planner *planner_ptr)
@@ -393,6 +440,12 @@ void goalCb(const geometry_msgs::PointStamped::ConstPtr &msg, planner *planner_p
 {
     if (planner_ptr->setGoal(msg->point.x, msg->point.y, msg->point.z))
         planner_ptr->plan();
+}
+
+// 接收标点功能发来的路径信息
+void pathCb(const nav_msgs::Path::ConstPtr &msg, planner *planner_ptr)
+{
+    planner_ptr->waypointsPlan(msg);
 }
 
 int main(int argc, char **argv)
@@ -424,8 +477,9 @@ int main(int argc, char **argv)
     ros::Subscriber octree_sub = n.subscribe<octomap_msgs::Octomap>("/octomap_binary", 1, boost::bind(&octomapCallback, _1, &planner_object));
     ros::Subscriber goal_sub = n.subscribe<geometry_msgs::PointStamped>("/nav/goal", 1, boost::bind(&goalCb, _1, &planner_object));
     ros::Subscriber start_sub = n.subscribe<geometry_msgs::PointStamped>("/nav/start", 1, boost::bind(&startCb, _1, &planner_object));
+    ros::Subscriber path_sub = n.subscribe<nav_msgs::Path>("/path/waypoints", 1, boost::bind(&pathCb, _1, &planner_object));
 
-    traj_pub = n.advertise<nav_msgs::Path>("waypoints", 1);
+    traj_pub = n.advertise<nav_msgs::Path>("/nav/waypoints", 1);
 
     std::cout << "OMPL version: " << OMPL_VERSION << std::endl;
 
