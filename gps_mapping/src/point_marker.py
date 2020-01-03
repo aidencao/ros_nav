@@ -7,6 +7,7 @@ from nav_msgs.msg import Path
 from interactive_markers.interactive_marker_server import *
 from visualization_msgs.msg import *
 from interactive_markers.menu_handler import *
+from std_msgs.msg import String
 
 menu_handler = MenuHandler()
 
@@ -175,10 +176,10 @@ def initMenu():
     # menu_handler.insert("设为导航起点", callback=menuSetStartCallback)
     # menu_handler.insert("设为导航终点", callback=menuSetGoalCallback)
     menu_handler.insert("生成GPS路径", callback=transGPSCallback)
-    menu_handler.insert("高度设为10", callback=testSet10)
-
 
 ##############################################################################
+
+
 def x_latitudeMapping(x1, lat1, x2, lat2):  # 纬度向北增加 经度往东增加 假定x轴与纬度重合
     a = (lat1-lat2)/(x1-x2)
     b = lat1-a*x1
@@ -225,13 +226,35 @@ def getPathCallback(data):
 # 用于多点位导航标记
 
 
-def testSet10(data):  # 测试直接设置高度的代码
-    pose = data.pose
-    pose.position.z = 10
-    server.setPose(data.marker_name, pose)
+def setHighCallback(data):  # 测试直接设置高度的代码
+    # pose = data.pose
+    # pose.position.z = 10
+    # server.setPose(data.marker_name, pose)
 
-    marker = server.get(data.marker_name)
-    marker.description = "xxxxxxxxxxxxxx"
+    # marker = server.get(data.marker_name)
+    # marker.description = "xxxxxxxxxxxxxx"
+    # server.insert(marker)
+    # server.applyChanges()
+
+    msg = data.data.split("$", 1)
+    point_id = msg[0]
+    height = msg[1]
+
+    marker = server.get(point_id)
+    if marker == None:
+        rospy.logwarn("不存在对应编号的路径点")
+        return
+
+    try:
+        heightd = float(height)
+    except ValueError:
+        rospy.logwarn("输入高度非法")
+        return
+
+    marker.pose.position.z = heightd
+    lat, lon = getGps(marker.pose.position.x, marker.pose.position.y)
+    marker.description = "id:" + str(point_id) + " x:"+str(marker.pose.position.x) + " y:" + \
+        str(marker.pose.position.y) + " z:" + str(heightd) + " lat:" + str(lat) + "  lon:" + str(lon)
     server.insert(marker)
     server.applyChanges()
 
@@ -290,6 +313,9 @@ if __name__ == '__main__':
 
             rospy.Subscriber("nav/waypoints", Path,
                              getPathCallback, queue_size=1)
+
+            rospy.Subscriber("gps_point_cmd", String,
+                             setHighCallback, queue_size=1)
 
             # start_pub = rospy.Publisher(
             #     'nav/start', PointStamped, queue_size=1)
