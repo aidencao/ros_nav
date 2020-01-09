@@ -4,6 +4,7 @@ import numpy as np
 import fcl
 import rospy
 from octomap_msgs.msg import Octomap
+import math
 
 
 def isCollision():
@@ -26,8 +27,12 @@ def isCollision():
 
 if __name__ == '__main__':
     try:
-        rospy.init_node("path_planner_node")
-
-        print(isCollision())
+        x = 0
+        y = 0
+        z = 0
+        w = 1
+        yaw = math.atan2(2*(w*z+x*y),1-2*(z*z+y*y))
+        angleYaw = yaw*180/math.pi
+        print(yaw)
     except KeyboardInterrupt:
         print("Shutting down path_planner")

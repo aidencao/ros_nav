@@ -44,12 +44,13 @@ int main(int argc, char **argv)
 	pcl::io::loadPCDFile(path, cloud1);
 
 	//旋转坐标
-	Eigen::Affine3f transform1 = Eigen::Affine3f::Identity();
-	transform1.rotate(Eigen::AngleAxisf(1.570795, Eigen::Vector3f::UnitX()));
-	transform1.rotate(Eigen::AngleAxisf(1.570795, Eigen::Vector3f::UnitY()));
-	pcl::transformPointCloud(cloud1, cloud2, transform1);
+	// Eigen::Affine3f transform1 = Eigen::Affine3f::Identity();
+	// transform1.rotate(Eigen::AngleAxisf(1.570795, Eigen::Vector3f::UnitX()));
+	// transform1.rotate(Eigen::AngleAxisf(1.570795, Eigen::Vector3f::UnitY()));
+	// pcl::transformPointCloud(cloud1, cloud2, transform1);
 
-	pcl::toROSMsg(cloud2, output); // 转换成ROS下的数据类型 最终通过topic发布
+	// pcl::toROSMsg(cloud2, output); // 转换成ROS下的数据类型 最终通过topic发布
+	pcl::toROSMsg(cloud1, output); // 转换成ROS下的数据类型 最终通过topic发布
 
 	output.header.stamp = ros::Time::now();
 	output.header.frame_id = frame_id;

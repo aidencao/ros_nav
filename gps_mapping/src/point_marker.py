@@ -44,13 +44,13 @@ def createNewPoint(frame_id, x, y, seq):
 
     int_marker.pose.position.x = x
     int_marker.pose.position.y = y
-    int_marker.scale = 4.5
+    int_marker.scale = 0.5
 
     box_marker = Marker()
     box_marker.type = Marker.CUBE
-    box_marker.scale.x = 3
-    box_marker.scale.y = 3
-    box_marker.scale.z = 3
+    box_marker.scale.x = 0.2
+    box_marker.scale.y = 0.2
+    box_marker.scale.z = 0.2
     box_marker.color.r = 0.0
     box_marker.color.g = 0.5
     box_marker.color.b = 0.5

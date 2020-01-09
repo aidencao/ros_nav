@@ -2,7 +2,7 @@
 <launch>
  
   <node name="publish_pointcloud" pkg="publish_pointcloud" type="publish_pointcloud">
-	  <param name="path" type="string" value="$(find publish_pointcloud)/data/gym1.pcd"/>
+	  <param name="path" type="string" value="$(find publish_pointcloud)/data/autoware_hall.pcd"/>
 	  <param name="frame_id" type="string" value="camera"/>
 	  <param name="topic" type="string" value="/pointcloud/output"/>
 	  <param name="hz" type="int" value="2"/>
