@@ -175,7 +175,7 @@ def initMenu():
     menu_handler.insert("发送巡航点，进行路径规划", callback=menuSendPointsCallback)
     # menu_handler.insert("设为导航起点", callback=menuSetStartCallback)
     # menu_handler.insert("设为导航终点", callback=menuSetGoalCallback)
-    menu_handler.insert("生成GPS路径", callback=transGPSCallback)
+    menu_handler.insert("转换为GPS路径，通过串口发送", callback=sendGpsWaypoints)
 
 ##############################################################################
 
@@ -206,16 +206,18 @@ def checkParam(x1, x2, y1, y2, lat1, lat2, lon1, lon2):
         return False
 
 
-def transGPSCallback(data):
-    global current_path
+def transGPS(path):  # 将规划出的路径转换为GPS信息
+    waypoints_divid = "$"
+    waypoints_seq = []
 
-    if current_path != False:
-        for i, point in enumerate(current_path):
-            lat, lon = getGps(point.pose.position.x, point.pose.position.y)
-            rospy.loginfo("x:" + str(point.pose.position.x) + "  y:" + str(point.pose.position.y) +
-                          "  z:" + str(point.pose.position.z)+" lat:" + str(lat) + "  lon:" + str(lon))
-    else:
-        rospy.logwarn("当前还未有已生成的路径")
+    for i, point in enumerate(path):
+        gps_divid = "@"
+        lat, lon = getGps(point.pose.position.x, point.pose.position.y)
+        gps_point_seq = (str(lat), str(lon), str(point.pose.position.z))
+
+        waypoints_seq.append(gps_divid.join(gps_point_seq))
+
+    return waypoints_divid.join(waypoints_seq)
 
 
 def getPathCallback(data):
@@ -254,7 +256,8 @@ def setHighCallback(data):  # 测试直接设置高度的代码
     marker.pose.position.z = heightd
     lat, lon = getGps(marker.pose.position.x, marker.pose.position.y)
     marker.description = "id:" + str(point_id) + " x:"+str(marker.pose.position.x) + " y:" + \
-        str(marker.pose.position.y) + " z:" + str(heightd) + " lat:" + str(lat) + "  lon:" + str(lon)
+        str(marker.pose.position.y) + " z:" + str(heightd) + \
+        " lat:" + str(lat) + "  lon:" + str(lon)
     server.insert(marker)
     server.applyChanges()
 
@@ -280,6 +283,19 @@ def menuSendPointsCallback(data):  # 发送巡航点
         nav_path.poses.append(pose)
 
     nav_pub.publish(nav_path)
+
+#########################################################################################
+# 用于与串口程序通信
+
+
+def sendGpsWaypoints(data):
+    global current_path
+
+    if current_path != False:
+        waypoints_msg = transGPS(current_path)
+        gps_pub.publish(waypoints_msg)
+    else:
+        rospy.logwarn("当前还未有已生成的路径")
 
 
 if __name__ == '__main__':
@@ -320,6 +336,7 @@ if __name__ == '__main__':
             # start_pub = rospy.Publisher(
             #     'nav/start', PointStamped, queue_size=1)
             # goal_pub = rospy.Publisher('nav/goal', PointStamped, queue_size=1)
+            gps_pub = rospy.Publisher("gps/waypoints", String, queue_size=1)
             nav_pub = rospy.Publisher("path/waypoints", Path, queue_size=1)
 
             # 创建交互式标记服务，命名空间为nav_points
