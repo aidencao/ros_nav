@@ -1,0 +1,6 @@
+<launch>
+     <param name="serial_port_name" type="string" value="/dev/ttyUSB0"/>
+     <param name="serial_baud_rate" type="int" value="57600"/>
+     <node pkg="uav_communication" type="uav_communication" name="communication" output="screen">
+     </node>
+</launch>
