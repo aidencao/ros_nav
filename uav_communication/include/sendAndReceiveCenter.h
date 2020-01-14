@@ -42,5 +42,7 @@ void send_control_cmd(const int cmd);
 
 void send_drone_height_cmd(const float cmd);
 
+void send_waypoints_cmd(const string cmd);
+
 void GCS_InitFunc();
 #endif

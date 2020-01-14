@@ -7,6 +7,27 @@
 queue<string> send_buffer_queue;
 pthread_mutex_t send_buffer_queue_lock;
 
+//字符串分割函数
+std::vector<std::string> split(std::string str, std::string pattern)
+{
+    std::string::size_type pos;
+    std::vector<std::string> result;
+    str += pattern; //扩展字符串以方便操作
+    int size = str.size();
+
+    for (int i = 0; i < size; i++)
+    {
+        pos = str.find(pattern, i);
+        if (pos < size)
+        {
+            std::string s = str.substr(i, pos - i);
+            result.push_back(s);
+            i = pos + pattern.size() - 1;
+        }
+    }
+    return result;
+}
+
 //发送消息
 void GCS_AddMsgToSendBuffer(const char *msg, size_t len)
 {
@@ -74,6 +95,41 @@ void send_drone_height_cmd(const float cmd)
     idx += CRC16_BYTES;
 
     GCS_AddMsgToSendBuffer(drone_height_msg, idx);
+}
+
+// 发送导航点
+void send_waypoints_cmd(const string cmd)
+{
+    vector<string> points = split(cmd, "$");
+    int pack_length = points.size() * 12 + 1 + 2 + 4 + 2;
+    static char pack_bytes[2048];
+    size_t idx = 0;
+    pack_bytes[idx++] = 0xfe;
+    pack_bytes[idx++] = 0xff;
+    *(UINT32 *)(&pack_bytes[idx]) = (UINT32)pack_length;
+    idx += sizeof(UINT32);
+    pack_bytes[idx++] = 0x02;
+    pack_bytes[idx++] = 0x30;
+    pack_bytes[idx++] = (int)points.size();
+
+    for (int i = 0; i < points.size(); i++)
+    {
+        string point = points[i];
+        vector<string> gps_info = split(point, "@");
+        UINT32 lat = stof(gps_info[0]) * 1e6;
+        UINT32 lon = stof(gps_info[1]) * 1e6;
+        int alt = stof(gps_info[2]) * 1e6;
+        *(UINT32 *)(&pack_bytes[idx]) = lat;
+        idx += sizeof(UINT32);
+        *(UINT32 *)(&pack_bytes[idx]) = lon;
+        idx += sizeof(UINT32);
+        *(INT32 *)(&pack_bytes[idx]) = alt;
+        idx += sizeof(INT32);
+    }
+
+    *(UINT16 *)(&pack_bytes[idx]) = (UINT16)crc16(&pack_bytes[SND_MSG_HEAD_LEN], idx - SND_MSG_HEAD_LEN); //crc16
+    idx += CRC16_BYTES;
+    GCS_AddMsgToSendBuffer(pack_bytes, idx);
 }
 
 static void get_ndt_points(const char *buf)
