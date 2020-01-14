@@ -66,7 +66,7 @@ static void waypoints_cmd_callback(const std_msgs::String::ConstPtr &msg)
   ROS_INFO("waypoints_cmd received!");
   pthread_mutex_lock(&waypoints_lock);
   send_waypoints_cmd(msg->data);
-  pthread_mutex_lock(&waypoints_lock);
+  pthread_mutex_unlock(&waypoints_lock);
 }
 
 int main(int argc, char *argv[])

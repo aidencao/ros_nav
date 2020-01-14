@@ -102,7 +102,7 @@ void send_waypoints_cmd(const string cmd)
 {
     vector<string> points = split(cmd, "$");
     int pack_length = points.size() * 12 + 1 + 2 + 4 + 2;
-    static char pack_bytes[2048];
+    static char pack_bytes[512];
     size_t idx = 0;
     pack_bytes[idx++] = 0xfe;
     pack_bytes[idx++] = 0xff;
