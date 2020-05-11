@@ -11,6 +11,11 @@ from std_msgs.msg import String
 
 menu_handler = MenuHandler()
 
+# 定义全局变量
+global a_lat, b_lat, a_lon, b_lon, current_path, point_count
+current_path = False
+point_count = 0
+
 
 def moveFeedback(feedback):
     p = feedback.pose.position
@@ -105,8 +110,8 @@ def createNewPoint(frame_id, x, y, seq):
 
 
 def showPointCallback(data):
-    createNewPoint(data.header.frame_id,
-                   data.pose.position.x, data.pose.position.y, data.header.seq)
+    createNewPoint(data.header.frame_id, data.pose.position.x,
+                   data.pose.position.y, data.header.seq)
 
 
 # def menuDeleteCallback(feedback):  # 删除当前点
@@ -125,8 +130,9 @@ def menuResetPointsCallback(data):  # 清空巡航点
 def menuShowPointsCallback(feedback):
     for key in sorted(server.marker_contexts):
         marker = server.marker_contexts[key].int_marker
-        print("编号：" + key + " x:"+str(marker.pose.position.x) + " y:" +
-              str(marker.pose.position.y) + " z:"+str(marker.pose.position.z))
+        print("编号：" + key + " x:" + str(marker.pose.position.x) + " y:" +
+              str(marker.pose.position.y) + " z:" +
+              str(marker.pose.position.z))
     print("\n")
 
 
@@ -147,7 +153,6 @@ def menuShowPointsCallback(feedback):
 
 #     print feedback.marker_name + " is now at " + \
 #         str(p.x) + ", " + str(p.y) + ", " + str(p.z) + ", 设为起点"
-
 
 # def menuSetGoalCallback(feedback):
 #     global current_path
@@ -177,25 +182,26 @@ def initMenu():
     # menu_handler.insert("设为导航终点", callback=menuSetGoalCallback)
     menu_handler.insert("转换为GPS路径，通过串口发送", callback=sendGpsWaypoints)
 
+
 ##############################################################################
 
 
 def x_latitudeMapping(x1, lat1, x2, lat2):  # 纬度向北增加 经度往东增加 假定x轴与纬度重合
-    a = (lat1-lat2)/(x1-x2)
-    b = lat1-a*x1
+    a = (lat1 - lat2) / (x1 - x2)
+    b = lat1 - a * x1
     return a, b
 
 
 def y_longitudeMapping(y1, lon1, y2, lon2):  # 经度向东增加 假定y轴负方向与经度重合
-    a = (lon1-lon2)/(y1-y2)
-    b = lon1-a*y1
+    a = (lon1 - lon2) / (y1 - y2)
+    b = lon1 - a * y1
     return a, b
 
 
 def getGps(x, y):
     global a_lat, b_lat, a_lon, b_lon
-    lat = a_lat*x+b_lat
-    lon = a_lon*y+b_lon
+    lat = a_lat * x + b_lat
+    lon = a_lon * y + b_lon
     return lat, lon
 
 
@@ -223,6 +229,7 @@ def transGPS(path):  # 将规划出的路径转换为GPS信息
 def getPathCallback(data):
     global current_path
     current_path = data.poses
+
 
 ###############################################################
 # 用于多点位导航标记
@@ -284,6 +291,7 @@ def menuSendPointsCallback(data):  # 发送巡航点
 
     nav_pub.publish(nav_path)
 
+
 #########################################################################################
 # 用于与串口程序通信
 
@@ -303,11 +311,6 @@ if __name__ == '__main__':
         rospy.init_node("point_marker_node")
         rospy.loginfo("Starting point_marker")
 
-        # 定义全局变量
-        global a_lat, b_lat, a_lon, b_lon, current_path, point_count
-        current_path = False
-        point_count = 0
-
         # 获取标定点参数
         x1 = rospy.get_param("gps_mapping_node/x1", 2)
         y1 = rospy.get_param("gps_mapping_node/y1", 2)
@@ -324,14 +327,20 @@ if __name__ == '__main__':
             a_lon, b_lon = y_longitudeMapping(y1, lon1, y2, lon2)
 
             # 关注标点相关主题
-            rospy.Subscriber("goal", PoseStamped,
-                             showPointCallback, queue_size=1)
+            rospy.Subscriber("goal",
+                             PoseStamped,
+                             showPointCallback,
+                             queue_size=1)
 
-            rospy.Subscriber("nav/waypoints", Path,
-                             getPathCallback, queue_size=1)
+            rospy.Subscriber("nav/waypoints",
+                             Path,
+                             getPathCallback,
+                             queue_size=1)
 
-            rospy.Subscriber("gps_point_cmd", String,
-                             setHighCallback, queue_size=1)
+            rospy.Subscriber("gps_point_cmd",
+                             String,
+                             setHighCallback,
+                             queue_size=1)
 
             # start_pub = rospy.Publisher(
             #     'nav/start', PointStamped, queue_size=1)
