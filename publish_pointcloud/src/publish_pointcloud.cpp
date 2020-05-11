@@ -28,6 +28,7 @@ int main(int argc, char **argv)
 
 	std::string topic, path, frame_id;
 	int hz = 5;
+	bool rotate_xyz;
 
 	ros::init(argc, argv, "publish_pointcloud");
 	ros::NodeHandle nh;
@@ -36,6 +37,7 @@ int main(int argc, char **argv)
 	nh.param("publish_pointcloud/frame_id", frame_id, std::string("camera"));
 	nh.param("publish_pointcloud/topic", topic, std::string("/pointcloud/output"));
 	nh.param("publish_pointcloud/hz", hz, 5);
+	nh.param("publish_pointcloud/rotate_xyz", rotate_xyz, false);
 
 	ros::Publisher pcl_pub = nh.advertise<sensor_msgs::PointCloud2>(topic, 10);
 
@@ -43,14 +45,18 @@ int main(int argc, char **argv)
 	sensor_msgs::PointCloud2 output;
 	pcl::io::loadPCDFile(path, cloud1);
 
-	//旋转坐标
-	// Eigen::Affine3f transform1 = Eigen::Affine3f::Identity();
-	// transform1.rotate(Eigen::AngleAxisf(1.570795, Eigen::Vector3f::UnitX()));
-	// transform1.rotate(Eigen::AngleAxisf(1.570795, Eigen::Vector3f::UnitY()));
-	// pcl::transformPointCloud(cloud1, cloud2, transform1);
+	if (rotate_xyz)
+	{
+		//旋转坐标
+		Eigen::Affine3f transform1 = Eigen::Affine3f::Identity();
+		transform1.rotate(Eigen::AngleAxisf(1.570795, Eigen::Vector3f::UnitX()));
+		transform1.rotate(Eigen::AngleAxisf(1.570795, Eigen::Vector3f::UnitY()));
+		pcl::transformPointCloud(cloud1, cloud2, transform1);
 
-	// pcl::toROSMsg(cloud2, output); // 转换成ROS下的数据类型 最终通过topic发布
-	pcl::toROSMsg(cloud1, output); // 转换成ROS下的数据类型 最终通过topic发布
+		pcl::toROSMsg(cloud2, output); // 转换成ROS下的数据类型 最终通过topic发布
+	}
+	else
+		pcl::toROSMsg(cloud1, output); // 转换成ROS下的数据类型 最终通过topic发布
 
 	output.header.stamp = ros::Time::now();
 	output.header.frame_id = frame_id;
@@ -60,13 +66,14 @@ int main(int argc, char **argv)
 	cout << "topic = " << topic << endl;
 	cout << "hz = " << hz << endl;
 
-	// ros::Rate loop_rate(hz);
+	ros::Rate loop_rate(hz);
 	// while (ros::ok())
 	// {
 	// 	pcl_pub.publish(output);
 	// 	ros::spinOnce();
 	// 	loop_rate.sleep();
 	// }
+	loop_rate.sleep();
 	pcl_pub.publish(output);
 	return 0;
 }
