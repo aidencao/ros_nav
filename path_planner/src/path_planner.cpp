@@ -37,7 +37,7 @@ private:
     double step_range; //搜索步长
 
     // 连续碰撞检测
-    bool isContinuousCollisionFunction(geometry_msgs::PoseStamped pose)
+    bool isContinuousCollisionFunction(geometry_msgs::PoseStamped pose, geometry_msgs::PoseStamped pose1)
     {
         // //检测
         // Vector3d translation(pose.pose.position.x, pose.pose.position.y, pose.pose.position.z);
@@ -54,14 +54,18 @@ private:
         double current_y = pose.pose.position.y;
         double current_z = pose.pose.position.z;
 
+        double current_x1 = pose1.pose.position.x;
+        double current_y1 = pose1.pose.position.y;
+        double current_z1 = pose1.pose.position.z;
+
         //设计检测步长
-        double distance = sqrt(pow((goalp.x - current_x), 2) + pow((goalp.y - current_y), 2) + pow((goalp.z - current_z), 2));
+        double distance = sqrt(pow((current_x1 - current_x), 2) + pow((current_y1 - current_y), 2) + pow((current_z1 - current_z), 2));
         int count = distance / (step_range);
         count++;
 
-        double step_x = (goalp.x - current_x) / count;
-        double step_y = (goalp.y - current_y) / count;
-        double step_z = (goalp.z - current_z) / count;
+        double step_x = (current_x1 - current_x) / count;
+        double step_y = (current_y1 - current_y) / count;
+        double step_z = (current_z1 - current_z) / count;
 
         // 进行检测
         for (int i = 0; i <= count; i++)
@@ -249,7 +253,7 @@ public:
         pdef->print(std::cout);
 
         // 进行求解尝试
-        ob::PlannerStatus solved = plan->solve(5);
+        ob::PlannerStatus solved = plan->solve(7);
 
         if (solved.asString() == "Exact solution")
         {
@@ -263,7 +267,9 @@ public:
             msg.header.stamp = ros::Time::now();
             msg.header.frame_id = "camera";
 
-            for (std::size_t path_idx = 0; path_idx < pth->getStateCount(); path_idx++)
+            //for (std::size_t path_idx = 0; path_idx < pth->getStateCount(); path_idx++)
+            std::size_t path_idx = 0;
+            while (path_idx < pth->getStateCount())
             {
                 const ob::SE3StateSpace::StateType *se3state = pth->getState(path_idx)->as<ob::SE3StateSpace::StateType>();
 
@@ -286,30 +292,57 @@ public:
 
                 msg.poses.push_back(pose);
 
-                if (isContinuousCollisionFunction(pose))
+                // if (isContinuousCollisionFunction(pose))
+                // {
+                //     path_idx = pth->getStateCount() - 1;
+                //     const ob::SE3StateSpace::StateType *se3state = pth->getState(path_idx)->as<ob::SE3StateSpace::StateType>();
+
+                //     // 生成路径的位置信息
+                //     const ob::RealVectorStateSpace::StateType *pos = se3state->as<ob::RealVectorStateSpace::StateType>(0);
+
+                //     // 生成路径的方向信息
+                //     const ob::SO3StateSpace::StateType *rot = se3state->as<ob::SO3StateSpace::StateType>(1);
+
+                //     geometry_msgs::PoseStamped pose_goal;
+
+                //     pose_goal.pose.position.x = pos->values[0];
+                //     pose_goal.pose.position.y = pos->values[1];
+                //     pose_goal.pose.position.z = pos->values[2];
+
+                //     pose_goal.pose.orientation.x = rot->x;
+                //     pose_goal.pose.orientation.y = rot->y;
+                //     pose_goal.pose.orientation.z = rot->z;
+                //     pose_goal.pose.orientation.w = rot->w;
+
+                //     msg.poses.push_back(pose_goal);
+                //     break;
+                // }
+                for (std::size_t path_idy = pth->getStateCount() - 1; path_idy > path_idx; path_idy--)
                 {
-                    path_idx = pth->getStateCount() - 1;
-                    const ob::SE3StateSpace::StateType *se3state = pth->getState(path_idx)->as<ob::SE3StateSpace::StateType>();
+                    se3state = pth->getState(path_idy)->as<ob::SE3StateSpace::StateType>();
 
                     // 生成路径的位置信息
-                    const ob::RealVectorStateSpace::StateType *pos = se3state->as<ob::RealVectorStateSpace::StateType>(0);
+                    pos = se3state->as<ob::RealVectorStateSpace::StateType>(0);
 
                     // 生成路径的方向信息
-                    const ob::SO3StateSpace::StateType *rot = se3state->as<ob::SO3StateSpace::StateType>(1);
+                    rot = se3state->as<ob::SO3StateSpace::StateType>(1);
 
-                    geometry_msgs::PoseStamped pose_goal;
+                    geometry_msgs::PoseStamped pose1;
 
-                    pose_goal.pose.position.x = pos->values[0];
-                    pose_goal.pose.position.y = pos->values[1];
-                    pose_goal.pose.position.z = pos->values[2];
+                    pose1.pose.position.x = pos->values[0];
+                    pose1.pose.position.y = pos->values[1];
+                    pose1.pose.position.z = pos->values[2];
 
-                    pose_goal.pose.orientation.x = rot->x;
-                    pose_goal.pose.orientation.y = rot->y;
-                    pose_goal.pose.orientation.z = rot->z;
-                    pose_goal.pose.orientation.w = rot->w;
-
-                    msg.poses.push_back(pose_goal);
-                    break;
+                    pose1.pose.orientation.x = rot->x;
+                    pose1.pose.orientation.y = rot->y;
+                    pose1.pose.orientation.z = rot->z;
+                    pose1.pose.orientation.w = rot->w;
+                    if (isContinuousCollisionFunction(pose, pose1))
+                    {
+                        msg.poses.push_back(pose1);
+                        path_idx = path_idy + 1;
+                        break;
+                    }
                 }
             }
             //traj_pub.publish(msg);
