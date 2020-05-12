@@ -18,6 +18,7 @@ point_count = 0
 
 
 def moveFeedback(feedback):
+    cleanPath()
     p = feedback.pose.position
     marker = server.get(feedback.marker_name)
     lat, lon = getGps(p.x, p.y)
@@ -125,6 +126,7 @@ def menuResetPointsCallback(data):  # 清空巡航点
     point_count = 0
     server.clear()
     server.applyChanges()
+    cleanPath()
 
 
 def menuShowPointsCallback(feedback):
@@ -134,6 +136,17 @@ def menuShowPointsCallback(feedback):
               str(marker.pose.position.y) + " z:" +
               str(marker.pose.position.z))
     print("\n")
+
+
+def cleanPath():  # 清空路径
+    global current_path
+
+    if current_path != False:
+        nav_path = Path()
+        nav_path.header.stamp = rospy.Time.now()
+        nav_path.header.frame_id = "camera"
+        traj_pub.publish(nav_path)
+        current_path = False
 
 
 # def menuSetStartCallback(feedback):
@@ -228,7 +241,10 @@ def transGPS(path):  # 将规划出的路径转换为GPS信息
 
 def getPathCallback(data):
     global current_path
-    current_path = data.poses
+    if data.poses == []:
+        current_path = False
+    else:
+        current_path = data.poses
 
 
 ###############################################################
@@ -290,6 +306,7 @@ def menuSendPointsCallback(data):  # 发送巡航点
         nav_path.poses.append(pose)
 
     nav_pub.publish(nav_path)
+    cleanPath()
 
 
 #########################################################################################
@@ -349,11 +366,15 @@ if __name__ == '__main__':
             # goal_pub = rospy.Publisher('nav/goal', PointStamped, queue_size=1)
             gps_pub = rospy.Publisher("gps/waypoints", String, queue_size=1)
             nav_pub = rospy.Publisher("path/waypoints", Path, queue_size=1)
+            traj_pub = rospy.Publisher("nav/waypoints", Path, queue_size=1)
 
             # 创建交互式标记服务，命名空间为nav_points
             server = InteractiveMarkerServer("nav_points")
 
             initMenu()
+
+            # 关闭前清除标记
+            rospy.on_shutdown(cleanPath)
 
             rospy.spin()
         else:
