@@ -10,5 +10,7 @@
         <param name="lon1" type="double" value="103.9286102"/>
         <param name="lat2" type="double" value="30.7469452"/>
         <param name="lon2" type="double" value="103.929043"/>
+        <param name="marker_size" type="double" value="4.5"/>
+        <param name="box_size" type="double" value="3"/>
     </node>
 </launch>

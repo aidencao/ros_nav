@@ -12,7 +12,7 @@ from std_msgs.msg import String
 menu_handler = MenuHandler()
 
 # 定义全局变量
-global a_lat, b_lat, a_lon, b_lon, current_path, point_count
+global a_lat, b_lat, a_lon, b_lon, current_path, point_count, marker_size, box_size
 current_path = False
 point_count = 0
 
@@ -38,7 +38,7 @@ def normalizeQuaternion(quaternion_msg):
 
 
 def createNewPoint(frame_id, x, y, seq):
-    global server, menu_handler, point_count
+    global server, menu_handler, point_count, marker_size, box_size
 
     int_marker = InteractiveMarker()
     int_marker.header.frame_id = frame_id
@@ -49,13 +49,13 @@ def createNewPoint(frame_id, x, y, seq):
 
     int_marker.pose.position.x = x
     int_marker.pose.position.y = y
-    int_marker.scale = 0.5
+    int_marker.scale = marker_size
 
     box_marker = Marker()
     box_marker.type = Marker.CUBE
-    box_marker.scale.x = 0.2
-    box_marker.scale.y = 0.2
-    box_marker.scale.z = 0.2
+    box_marker.scale.x = box_size
+    box_marker.scale.y = box_size
+    box_marker.scale.z = box_size
     box_marker.color.r = 0.0
     box_marker.color.g = 0.5
     box_marker.color.b = 0.5
@@ -320,6 +320,8 @@ if __name__ == '__main__':
         lon1 = rospy.get_param("gps_mapping_node/lon1", 2)
         lat2 = rospy.get_param("gps_mapping_node/lat2", 2)
         lon2 = rospy.get_param("gps_mapping_node/lon2", 2)
+        marker_size = rospy.get_param("gps_mapping_node/marker_size", 4.5)
+        box_size = rospy.get_param("gps_mapping_node/box_size", 3)
 
         # 判断标定点是否合法
         if checkParam(x1, x2, y1, y2, lat1, lat2, lon1, lon2):
