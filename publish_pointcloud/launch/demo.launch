@@ -6,7 +6,7 @@
 	  <param name="frame_id" type="string" value="camera"/>
 	  <param name="topic" type="string" value="/pointcloud/output"/>
 	  <param name="hz" type="int" value="2"/>
-    <param name="rotate_xyz" value="false"/>
+    <param name="rotate_xyz" value="true"/>
   </node>
 
   <!-- Load ocotmap launch -->
