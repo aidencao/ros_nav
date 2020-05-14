@@ -101,12 +101,12 @@ void send_drone_height_cmd(const float cmd)
 void send_waypoints_cmd(const string cmd)
 {
     vector<string> points = split(cmd, "$");
-    int pack_length = points.size() * 12 + 1 + 2 + 4 + 2;
+    int pack_length = points.size() * 12 + 1 + 2 + 4 + 2 + CRC16_BYTES;
     static char pack_bytes[512];
     size_t idx = 0;
     pack_bytes[idx++] = 0xfe;
     pack_bytes[idx++] = 0xff;
-    *(UINT32 *)(&pack_bytes[idx]) = (UINT32)pack_length;
+    *(UINT32 *)(&pack_bytes[idx]) = (UINT32)pack_length - 6;
     idx += sizeof(UINT32);
     pack_bytes[idx++] = 0x02;
     pack_bytes[idx++] = 0x30;
@@ -125,6 +125,8 @@ void send_waypoints_cmd(const string cmd)
         idx += sizeof(UINT32);
         *(INT32 *)(&pack_bytes[idx]) = alt;
         idx += sizeof(INT32);
+
+        ROS_INFO("lat is : %d,lon is : %d,alt is : %d", lat, lon, alt);
     }
 
     *(UINT16 *)(&pack_bytes[idx]) = (UINT16)crc16(&pack_bytes[SND_MSG_HEAD_LEN], idx - SND_MSG_HEAD_LEN); //crc16
