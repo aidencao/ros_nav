@@ -3,6 +3,7 @@
 #include "server.h"
 #include "alexSerialPort.h"
 #include <ros/ros.h>
+#include <nav_msgs/Path.h>
 
 queue<string> send_buffer_queue;
 pthread_mutex_t send_buffer_queue_lock;
@@ -127,6 +128,41 @@ void send_waypoints_cmd(const string cmd)
         idx += sizeof(INT32);
 
         ROS_INFO("lat is : %d,lon is : %d,alt is : %d", lat, lon, alt);
+    }
+
+    *(UINT16 *)(&pack_bytes[idx]) = (UINT16)crc16(&pack_bytes[SND_MSG_HEAD_LEN], idx - SND_MSG_HEAD_LEN); //crc16
+    idx += CRC16_BYTES;
+    GCS_AddMsgToSendBuffer(pack_bytes, idx);
+}
+
+// 发送地图坐标路径
+void send_xyz_path_cmd(const nav_msgs::Path path)
+{
+    int pack_length = path.poses.size() * 12 + 1 + 2 + 4 + 2 + CRC16_BYTES;
+    static char pack_bytes[512];
+    size_t idx = 0;
+    pack_bytes[idx++] = 0xfe;
+    pack_bytes[idx++] = 0xff;
+    *(UINT32 *)(&pack_bytes[idx]) = (UINT32)pack_length - 6;
+    idx += sizeof(UINT32);
+    pack_bytes[idx++] = 0x02;
+    pack_bytes[idx++] = 0x91;
+    pack_bytes[idx++] = (int)path.poses.size();
+
+    for (int i = 0; i < path.poses.size(); i++)
+    {
+        geometry_msgs::Point point = path.poses[i].pose.position;
+        int x = (point.x) * 1e6;
+        int y = (point.y) * 1e6;
+        int z = (point.z) * 1e6;
+        *(INT32 *)(&pack_bytes[idx]) = x;
+        idx += sizeof(INT32);
+        *(INT32 *)(&pack_bytes[idx]) = y;
+        idx += sizeof(INT32);
+        *(INT32 *)(&pack_bytes[idx]) = z;
+        idx += sizeof(INT32);
+
+        ROS_INFO("x is : %d,y is : %d,z is : %d", x, y, z);
     }
 
     *(UINT16 *)(&pack_bytes[idx]) = (UINT16)crc16(&pack_bytes[SND_MSG_HEAD_LEN], idx - SND_MSG_HEAD_LEN); //crc16

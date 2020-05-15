@@ -194,6 +194,7 @@ def initMenu():
     # menu_handler.insert("设为导航起点", callback=menuSetStartCallback)
     # menu_handler.insert("设为导航终点", callback=menuSetGoalCallback)
     menu_handler.insert("转换为GPS路径，通过串口发送", callback=sendGpsWaypoints)
+    menu_handler.insert("通过串口直接发送地图坐标", callback=sendXYZWaypoints)
 
 
 ##############################################################################
@@ -229,7 +230,7 @@ def transGPS(path):  # 将规划出的路径转换为GPS信息
     waypoints_divid = "$"
     waypoints_seq = []
 
-    for i, point in enumerate(path):
+    for i, point in enumerate(path.poses):
         gps_divid = "@"
         lat, lon = getGps(point.pose.position.x, point.pose.position.y)
         gps_point_seq = (str(lat), str(lon), str(point.pose.position.z))
@@ -244,7 +245,7 @@ def getPathCallback(data):
     if data.poses == []:
         current_path = False
     else:
-        current_path = data.poses
+        current_path = data
 
 
 ###############################################################
@@ -323,6 +324,15 @@ def sendGpsWaypoints(data):
         rospy.logwarn("当前还未有已生成的路径")
 
 
+def sendXYZWaypoints(data):
+    global current_path
+
+    if current_path != False:
+        xyz_pub.publish(current_path)
+    else:
+        rospy.logwarn("当前还未有已生成的路径")
+
+
 if __name__ == '__main__':
     try:
         rospy.init_node("point_marker_node")
@@ -364,9 +374,14 @@ if __name__ == '__main__':
             # start_pub = rospy.Publisher(
             #     'nav/start', PointStamped, queue_size=1)
             # goal_pub = rospy.Publisher('nav/goal', PointStamped, queue_size=1)
-            gps_pub = rospy.Publisher("gps/waypoints", String, queue_size=1)
-            nav_pub = rospy.Publisher("path/waypoints", Path, queue_size=1)
-            traj_pub = rospy.Publisher("nav/waypoints", Path, queue_size=1)
+            gps_pub = rospy.Publisher("gps/path", String,
+                                      queue_size=1)  # 用于向串口发送GPS路径
+            nav_pub = rospy.Publisher("path/waypoints", Path,
+                                      queue_size=1)  # 发送路径规划锚点
+            traj_pub = rospy.Publisher("nav/waypoints", Path,
+                                       queue_size=1)  # 用于将规划好的路径清空
+            xyz_pub = rospy.Publisher("xyz/path", Path,
+                                      queue_size=1)  #用于向串口发送地图坐标路径
 
             # 创建交互式标记服务，命名空间为nav_points
             server = InteractiveMarkerServer("nav_points")

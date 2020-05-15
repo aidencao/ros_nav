@@ -12,12 +12,14 @@
 #include <std_msgs/Int8.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/String.h>
+#include <nav_msgs/Path.h>
 
 geometry_msgs::PoseStamped localizer_pose; // pose of sensor
 pthread_mutex_t initial_position_lock;
 pthread_mutex_t basic_cmd_lock;
 pthread_mutex_t drone_height_lock;
 pthread_mutex_t waypoints_lock;
+pthread_mutex_t xyz_lock;
 ros::Time current_time;
 ros::Publisher current_pose_pub;
 
@@ -69,6 +71,15 @@ static void waypoints_cmd_callback(const std_msgs::String::ConstPtr &msg)
   pthread_mutex_unlock(&waypoints_lock);
 }
 
+// 接收到xyz_Waypoints信息
+static void xyz_path_cmd_callback(const nav_msgs::PathConstPtr &path)
+{
+  ROS_INFO("xyz_path_cmd received!");
+  pthread_mutex_lock(&xyz_lock);
+  send_xyz_path_cmd(path);
+  pthread_mutex_unlock(&xyz_lock);
+}
+
 int main(int argc, char *argv[])
 {
   int ret;
@@ -90,7 +101,8 @@ int main(int argc, char *argv[])
 
   ros::Subscriber basic_cmd_sub = nh.subscribe("/control_cmd", 5, &basic_cmd_callback);
   ros::Subscriber drone_height_cmd_sub = nh.subscribe("/drone_height_cmd", 5, &drone_height_cmd_callback);
-  ros::Subscriber waypoints_cmd_sub = nh.subscribe("gps/waypoints", 1, &waypoints_cmd_callback);
+  ros::Subscriber waypoints_cmd_sub = nh.subscribe("gps/path", 1, &waypoints_cmd_callback);
+  ros::Subscriber xyz_cmd_sub = nh.subscribe("xyz/path", 1, &waypoints_cmd_callback);
   //ros::Subscriber localizer_sub = nh.subscribe("/localizer_pose",1, &localizer_pose_callback);
   //ros::Subscriber initialpose_sub = nh.subscribe("/initialpose", 2, &initialpose_callback);
   //初始化锁
@@ -98,6 +110,7 @@ int main(int argc, char *argv[])
   pthread_mutex_init(&basic_cmd_lock, NULL);
   pthread_mutex_init(&drone_height_lock, NULL);
   pthread_mutex_init(&waypoints_lock, NULL);
+  pthread_mutex_init(&xyz_lock, NULL);
   //gcs线程初始化
   ROS_INFO("GCS_InitFunc...");
   GCS_InitFunc();
