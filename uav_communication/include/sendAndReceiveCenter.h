@@ -44,5 +44,7 @@ void send_drone_height_cmd(const float cmd);
 
 void send_waypoints_cmd(const string cmd);
 
+void send_xyz_path_cmd(const nav_msgs::PathConstPtr &path);
+
 void GCS_InitFunc();
 #endif

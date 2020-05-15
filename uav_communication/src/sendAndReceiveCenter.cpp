@@ -136,9 +136,9 @@ void send_waypoints_cmd(const string cmd)
 }
 
 // 发送地图坐标路径
-void send_xyz_path_cmd(const nav_msgs::Path path)
+void send_xyz_path_cmd(const nav_msgs::PathConstPtr &path)
 {
-    int pack_length = path.poses.size() * 12 + 1 + 2 + 4 + 2 + CRC16_BYTES;
+    int pack_length = path->poses.size() * 12 + 1 + 2 + 4 + 2 + CRC16_BYTES;
     static char pack_bytes[512];
     size_t idx = 0;
     pack_bytes[idx++] = 0xfe;
@@ -147,11 +147,11 @@ void send_xyz_path_cmd(const nav_msgs::Path path)
     idx += sizeof(UINT32);
     pack_bytes[idx++] = 0x02;
     pack_bytes[idx++] = 0x91;
-    pack_bytes[idx++] = (int)path.poses.size();
+    pack_bytes[idx++] = (int)path->poses.size();
 
-    for (int i = 0; i < path.poses.size(); i++)
+    for (int i = 0; i < path->poses.size(); i++)
     {
-        geometry_msgs::Point point = path.poses[i].pose.position;
+        geometry_msgs::Point point = path->poses[i].pose.position;
         int x = (point.x) * 1e6;
         int y = (point.y) * 1e6;
         int z = (point.z) * 1e6;
