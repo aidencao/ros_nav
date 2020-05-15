@@ -3,6 +3,7 @@
 
 #include "uavInc.h"
 #include "uavtype.h"
+#include <nav_msgs/Path.h>
 
 #define REV_MSG_HEAD_LEN 6                      //头长度
 #define SND_MSG_HEAD_LEN REV_MSG_HEAD_LEN

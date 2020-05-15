@@ -3,7 +3,6 @@
 #include "server.h"
 #include "alexSerialPort.h"
 #include <ros/ros.h>
-#include <nav_msgs/Path.h>
 
 queue<string> send_buffer_queue;
 pthread_mutex_t send_buffer_queue_lock;
