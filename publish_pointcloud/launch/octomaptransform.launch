@@ -5,7 +5,7 @@
     <param name="resolution" value="5" />
 
     <!-- name of the fixed frame, needs to be "/map" for SLAM -->
-    <param name="frame_id" type="string" value="/camera" />
+    <param name="frame_id" type="string" value="/map" />
 
     <!-- max range / depth resolution of the kinect in meter -->
     <param name="sensor_model/max_range" value="500.0" />

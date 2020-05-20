@@ -265,7 +265,7 @@ public:
 
             //生成路径消息
             msg.header.stamp = ros::Time::now();
-            msg.header.frame_id = "camera";
+            msg.header.frame_id = "map";
 
             //for (std::size_t path_idx = 0; path_idx < pth->getStateCount(); path_idx++)
             std::size_t path_idx = 0;

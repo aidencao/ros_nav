@@ -3,6 +3,7 @@
 import rospy
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import PointStamped
+from nav_msgs.msg import Odometry
 from nav_msgs.msg import Path
 from interactive_markers.interactive_marker_server import *
 from visualization_msgs.msg import *
@@ -114,6 +115,61 @@ def showPointCallback(data):
     createNewPoint(data.header.frame_id, data.pose.position.x,
                    data.pose.position.y, data.header.seq)
 
+# 获取当前位置
+def setOdomCallback(data):
+    print("asdasdasdasdasdasd")
+    global server, menu_handler, marker_size, box_size
+    frame_id = data.header.frame_id
+    x = data.pose.pose.position.x
+    y = data.pose.pose.position.y
+    z = data.pose.pose.position.z
+
+    marker = server.get("-1")
+    if marker == None:
+        int_marker = InteractiveMarker()
+        int_marker.header.frame_id = frame_id
+        int_marker.name = str(-1)
+        lat, lon = getGps(x, y)
+        int_marker.description = "id:" + str(-1) + " x:"+str(x) + " y:" + \
+            str(y) + " z:" + str(z) + " lat:" + str(lat) + "  lon:" + str(lon)
+
+        int_marker.pose.position.x = x
+        int_marker.pose.position.y = y
+        int_marker.pose.position.z = z
+        int_marker.scale = marker_size
+
+        box_marker = Marker()
+        box_marker.type = Marker.CUBE
+        box_marker.scale.x = box_size
+        box_marker.scale.y = box_size
+        box_marker.scale.z = box_size
+        box_marker.color.r = 0.0
+        box_marker.color.g = 0.5
+        box_marker.color.b = 0.5
+        box_marker.color.a = 1.0
+
+        box_control = InteractiveMarkerControl()
+        box_control.interaction_mode = InteractiveMarkerControl.BUTTON
+        box_control.always_visible = True
+        box_control.markers.append(box_marker)
+
+        int_marker.controls.append(box_control)
+
+        server.insert(int_marker, moveFeedback)
+
+        menu_handler.apply(server, str(-1))
+
+        server.applyChanges()
+    else:
+        marker.pose.position.x = x
+        marker.pose.position.y = y
+        marker.pose.position.z = z
+        lat, lon = getGps(x, y)
+        marker.description = "id:" + str(-1) + " x:"+str(x) + " y:" + \
+            str(y) + " z:" + str(z) + " lat:" + str(lat) + "  lon:" + str(lon)
+        server.insert(marker)
+        server.applyChanges()
+
 
 # def menuDeleteCallback(feedback):  # 删除当前点
 #     rospy.loginfo(feedback.marker_name)
@@ -144,7 +200,7 @@ def cleanPath():  # 清空路径
     if current_path != False:
         nav_path = Path()
         nav_path.header.stamp = rospy.Time.now()
-        nav_path.header.frame_id = "camera"
+        nav_path.header.frame_id = "map"
         traj_pub.publish(nav_path)
         current_path = False
 
@@ -154,7 +210,7 @@ def cleanPath():  # 清空路径
 #     p = feedback.pose.position
 
 #     point = PointStamped()
-#     point.header.frame_id = "camera"
+#     point.header.frame_id = "map"
 #     point.header.stamp = rospy.Time.now()
 #     point.point.x = p.x
 #     point.point.y = p.y
@@ -172,7 +228,7 @@ def cleanPath():  # 清空路径
 #     p = feedback.pose.position
 
 #     point = PointStamped()
-#     point.header.frame_id = "camera"
+#     point.header.frame_id = "map"
 #     point.header.stamp = rospy.Time.now()
 #     point.point.x = p.x
 #     point.point.y = p.y
@@ -290,7 +346,7 @@ def menuSendPointsCallback(data):  # 发送巡航点
     # 生成巡航点路径消息
     nav_path = Path()
     nav_path.header.stamp = rospy.Time.now()
-    nav_path.header.frame_id = "camera"
+    nav_path.header.frame_id = "map"
 
     for key in sorted(server.marker_contexts):
         marker = server.marker_contexts[key].int_marker
@@ -369,6 +425,11 @@ if __name__ == '__main__':
             rospy.Subscriber("gps_point_cmd",
                              String,
                              setHighCallback,
+                             queue_size=1)
+
+            rospy.Subscriber("odom",
+                             Odometry,
+                             setOdomCallback,
                              queue_size=1)
 
             # start_pub = rospy.Publisher(

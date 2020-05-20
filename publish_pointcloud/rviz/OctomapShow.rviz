@@ -31,7 +31,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: PointCloud2
 Toolbars:
   toolButtonStyle: 2
 Visualization Manager:
@@ -171,7 +171,7 @@ Visualization Manager:
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: camera
+    Fixed Frame: map
     Frame Rate: 60
   Name: root
   Tools:

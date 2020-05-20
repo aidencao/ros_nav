@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
   ros::Subscriber basic_cmd_sub = nh.subscribe("/control_cmd", 5, &basic_cmd_callback);
   ros::Subscriber drone_height_cmd_sub = nh.subscribe("/drone_height_cmd", 5, &drone_height_cmd_callback);
   ros::Subscriber waypoints_cmd_sub = nh.subscribe("gps/path", 1, &waypoints_cmd_callback);
-  ros::Subscriber xyz_cmd_sub = nh.subscribe("xyz/path", 1, &waypoints_cmd_callback);
+  ros::Subscriber xyz_cmd_sub = nh.subscribe("xyz/path", 1, &xyz_path_cmd_callback);
   ros::Subscriber move_base_simple_sub = nh.subscribe("/goal", 5, &move_base_simple_callback);//接收目标点
   //ros::Subscriber localizer_sub = nh.subscribe("/localizer_pose",1, &localizer_pose_callback);
   ros::Subscriber initialpose_sub = nh.subscribe("/initialpose", 2, &initialpose_callback);
