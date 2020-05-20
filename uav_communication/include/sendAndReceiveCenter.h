@@ -19,9 +19,11 @@ enum MESSAGE_DIRECTION_ENUM {
 
 //消息的类型
 enum MESSAGE_ANALYSIS_ENUM {
-    MESSAGE_ANALYSIS_RECEIVE_NDTPOINTS              = 0x11,
+    MESSAGE_ANALYSIS_RECEIVE_NDTPOINTS              = 0x11, //接收无人机端发送的定位点
     MESSAGE_ANALYSIS_FLIGHT_CONTROL                 = 0x10,
     MESSAGE_ANALYSIS_SET_ALTITUDE                   = 0x40,
+    MESSAGE_ANALYSIS_SET_TARGET_POSE                = 0x90, // 添加向无人机发送目标点的命令
+    MESSAGE_ANALYSIS_SET_INIT_POSE_POINT            = 0x92, //给无人机发送初始定位点
     
 };
 
@@ -47,5 +49,8 @@ void send_waypoints_cmd(const string cmd);
 
 void send_xyz_path_cmd(const nav_msgs::PathConstPtr &path);
 
+void send_init_pose_point_cmd(const vector<double> &initPoint);
+
+void send_move_base_simple_goal_cmd(const std::vector<double> target_pose);
 void GCS_InitFunc();
 #endif
