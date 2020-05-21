@@ -9,16 +9,8 @@
     <param name="rotate_xyz" value="true"/>
   </node>
 
-  <!-- Load ocotmap launch -->
-  <include file="$(find publish_pointcloud)/launch/octomaptransform.launch" />
-
   <!-- RViz -->
   <node pkg="rviz" type="rviz" name="$(anon rviz)" respawn="false" output="screen" args="-d $(find publish_pointcloud)/rviz/OctomapShow.rviz"/>
-
-  <!-- Load ocotmap launch -->
-  <include file="$(find gps_mapping)/launch/gps_mapping.launch" />
-  <include file="$(find path_planner)/launch/path_planner.launch" />
-  <include file="$(find uav_communication)/launch/uav_communication.launch" />
 </launch>
 
  

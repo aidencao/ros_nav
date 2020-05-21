@@ -233,8 +233,8 @@ public:
     bool plan(nav_msgs::Path &msg)
     {
         // 创建规划器
-        og::InformedRRTstar *rrt = new og::InformedRRTstar(si);
-        //og::RRTConnect *rrt = new og::RRTConnect(si);
+        //og::InformedRRTstar *rrt = new og::InformedRRTstar(si);
+        og::RRTConnect *rrt = new og::RRTConnect(si);
         rrt->setRange(step_range); //设置步长
 
         ob::PlannerPtr plan(rrt);
@@ -261,7 +261,7 @@ public:
             std::cout << "找到路径:" << std::endl;
             ob::PathPtr path = pdef->getSolutionPath();
             pth = pdef->getSolutionPath()->as<og::PathGeometric>();
-            pth->printAsMatrix(std::cout);
+            //pth->printAsMatrix(std::cout);
 
             //生成路径消息
             msg.header.stamp = ros::Time::now();
