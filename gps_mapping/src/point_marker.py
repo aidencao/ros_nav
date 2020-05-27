@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding:utf-8
 import rospy
+import GPS_Point
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import PointStamped
 from nav_msgs.msg import Odometry
@@ -13,7 +14,7 @@ from std_msgs.msg import String
 menu_handler = MenuHandler()
 
 # 定义全局变量
-global a_lat, b_lat, a_lon, b_lon, current_path, point_count, marker_size, box_size
+global a_lat, b_lat, a_lon, b_lon, point0, current_path, point_count, marker_size, box_size
 current_path = False
 point_count = 0
 
@@ -115,9 +116,9 @@ def showPointCallback(data):
     createNewPoint(data.header.frame_id, data.pose.position.x,
                    data.pose.position.y, data.header.seq)
 
+
 # 获取当前位置
 def setOdomCallback(data):
-    print("asdasdasdasdasdasd")
     global server, menu_handler, marker_size, box_size
     frame_id = data.header.frame_id
     x = data.pose.pose.position.x
@@ -255,23 +256,28 @@ def initMenu():
 
 ##############################################################################
 
+# def x_latitudeMapping(x1, lat1, x2, lat2):  # 纬度向北增加 经度往东增加 假定x轴与纬度重合
+#     a = (lat1 - lat2) / (x1 - x2)
+#     b = lat1 - a * x1
+#     return a, b
 
-def x_latitudeMapping(x1, lat1, x2, lat2):  # 纬度向北增加 经度往东增加 假定x轴与纬度重合
-    a = (lat1 - lat2) / (x1 - x2)
-    b = lat1 - a * x1
-    return a, b
-
-
-def y_longitudeMapping(y1, lon1, y2, lon2):  # 经度向东增加 假定y轴负方向与经度重合
-    a = (lon1 - lon2) / (y1 - y2)
-    b = lon1 - a * y1
-    return a, b
+# def y_longitudeMapping(y1, lon1, y2, lon2):  # 经度向东增加 假定y轴负方向与经度重合
+#     a = (lon1 - lon2) / (y1 - y2)
+#     b = lon1 - a * y1
+#     return a, b
 
 
 def getGps(x, y):
+    # global a_lat, b_lat, a_lon, b_lon
+    # lat = a_lat * x + b_lat
+    # lon = a_lon * y + b_lon
+    # return lat, lon
     global a_lat, b_lat, a_lon, b_lon
-    lat = a_lat * x + b_lat
-    lon = a_lon * y + b_lon
+    lat = point0.getLat() + a_lat * (x - point0.getx()) + b_lat * (
+        y - point0.gety())
+    lon = point0.getLon() + a_lon * (x - point0.getx()) + b_lon * (
+        y - point0.gety())
+
     return lat, lon
 
 
@@ -405,11 +411,15 @@ if __name__ == '__main__':
         lon2 = rospy.get_param("gps_mapping_node/lon2", 2)
         marker_size = rospy.get_param("gps_mapping_node/marker_size", 4.5)
         box_size = rospy.get_param("gps_mapping_node/box_size", 3)
+        file_path = rospy.get_param("gps_mapping_node/file_path","/home/cyr/nav_ws/src/gps_mapping/src/test.txt")
 
         # 判断标定点是否合法
         if checkParam(x1, x2, y1, y2, lat1, lat2, lon1, lon2):
-            a_lat, b_lat = x_latitudeMapping(x1, lat1, x2, lat2)
-            a_lon, b_lon = y_longitudeMapping(y1, lon1, y2, lon2)
+            #     a_lat, b_lat = x_latitudeMapping(x1, lat1, x2, lat2)
+            #     a_lon, b_lon = y_longitudeMapping(y1, lon1, y2, lon2)
+            a_lat, b_lat, a_lon, b_lon, point0 = GPS_Point.avg_mapping(
+                GPS_Point.readPoint(
+                    file_path))
 
             # 关注标点相关主题
             rospy.Subscriber("goal",
@@ -427,10 +437,7 @@ if __name__ == '__main__':
                              setHighCallback,
                              queue_size=1)
 
-            rospy.Subscriber("odom",
-                             Odometry,
-                             setOdomCallback,
-                             queue_size=1)
+            rospy.Subscriber("odom", Odometry, setOdomCallback, queue_size=1)
 
             # start_pub = rospy.Publisher(
             #     'nav/start', PointStamped, queue_size=1)
@@ -448,6 +455,9 @@ if __name__ == '__main__':
             server = InteractiveMarkerServer("nav_points")
 
             initMenu()
+
+            lat, lon = getGps(41.4466667175, -0.747732877731)
+            print("lat:" + str(lat) + "  lon:" + str(lon))
 
             # 关闭前清除标记
             rospy.on_shutdown(cleanPath)

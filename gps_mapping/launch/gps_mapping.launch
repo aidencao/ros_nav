@@ -2,14 +2,15 @@
 <launch>
     <node pkg="gps_mapping" type="point_marker.py" name="gps_mapping_node" output="screen">
         <!-- 分别使用一号点和三号点进行标定 -->
-        <param name="x1" type="double" value="7.4204249382"/>
-        <param name="y1" type="double" value="-0.176393762231"/>
-        <param name="x2" type="double" value="74.8130569458"/>
-        <param name="y2" type="double" value="-78.4281463623"/>
-        <param name="lat1" type="double" value="30.7466829"/>
-        <param name="lon1" type="double" value="103.9286102"/>
-        <param name="lat2" type="double" value="30.7469452"/>
-        <param name="lon2" type="double" value="103.929043"/>
+        <param name="x1" type="double" value="-2.66909265518"/>
+        <param name="y1" type="double" value="-11.0494117737"/>
+        <param name="x2" type="double" value="-66.4625701904"/>
+        <param name="y2" type="double" value="-86.2508163452"/>
+        <param name="lat1" type="double" value="30.7492487"/>
+        <param name="lon1" type="double" value="103.9246926"/>
+        <param name="lat2" type="double" value="30.7489405"/>
+        <param name="lon2" type="double" value="103.9250616"/>
+        <param name="file_path" type="string" value="/home/cyr/nav_ws/src/gps_mapping/src/test.txt"/>
         <param name="marker_size" type="double" value="4.5"/>
         <param name="box_size" type="double" value="3"/>
     </node>
