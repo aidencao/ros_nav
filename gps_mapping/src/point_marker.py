@@ -456,7 +456,7 @@ if __name__ == '__main__':
 
             initMenu()
 
-            lat, lon = getGps(41.4466667175, -0.747732877731)
+            lat, lon = getGps(111.358467102,-3.80285739899)
             print("lat:" + str(lat) + "  lon:" + str(lon))
 
             # 关闭前清除标记
