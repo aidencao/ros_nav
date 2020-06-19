@@ -309,6 +309,14 @@ def getPathCallback(data):
     else:
         current_path = data
 
+# 测试GPS映射是否满意
+def testGpsMapping():
+    points = GPS_Point.readPoint("/home/cyr/nav_ws/src/gps_mapping/src/mark.txt")
+
+    for p in points:
+        lat, lon = getGps(p.getx(),p.gety())
+        print("x:" + str(p.getx()) + "  y:" + str(p.gety())+" lat:" + str(lat-p.getLat()) + "  lon:" + str(lon-p.getLon()))
+
 
 ###############################################################
 # 用于多点位导航标记
@@ -456,8 +464,7 @@ if __name__ == '__main__':
 
             initMenu()
 
-            lat, lon = getGps(41.4466667175, -0.747732877731)
-            print("lat:" + str(lat) + "  lon:" + str(lon))
+            # testGpsMapping()
 
             # 关闭前清除标记
             rospy.on_shutdown(cleanPath)
