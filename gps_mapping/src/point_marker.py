@@ -464,7 +464,7 @@ if __name__ == '__main__':
 
             initMenu()
 
-            # testGpsMapping()
+            testGpsMapping()
 
             # 关闭前清除标记
             rospy.on_shutdown(cleanPath)
