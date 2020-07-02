@@ -6,6 +6,7 @@ from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import PointStamped
 from nav_msgs.msg import Odometry
 from nav_msgs.msg import Path
+from sensor_msgs.msg import NavSatFix
 from interactive_markers.interactive_marker_server import *
 from visualization_msgs.msg import *
 from interactive_markers.menu_handler import *
@@ -14,7 +15,7 @@ from std_msgs.msg import String
 menu_handler = MenuHandler()
 
 # 定义全局变量
-global a_lat, b_lat, a_lon, b_lon, point0, current_path, point_count, marker_size, box_size
+global a_lat, b_lat, a_lon, b_lon, a_x, b_x, a_y, b_y, point0, current_path, point_count, marker_size, box_size
 current_path = False
 point_count = 0
 
@@ -171,6 +172,63 @@ def setOdomCallback(data):
         server.insert(marker)
         server.applyChanges()
 
+# 通过GPS获取当前位置
+def setGPSCallback(data):
+    if(data.status.status == -1):
+        return;
+    global server, menu_handler, marker_size, box_size
+    lat = data.latitude
+    lon = data.longitude
+    z = 0
+
+    marker = server.get("-1")
+    if marker == None:
+        int_marker = InteractiveMarker()
+        int_marker.header.frame_id = "map"
+        int_marker.name = str(-1)
+        x, y = getXYZ(lat, lon)
+        print(x,y)
+        int_marker.description = "id:" + str(-1) + " x:"+str(x) + " y:" + \
+            str(y) + " z:" + str(z) + " lat:" + str(lat) + "  lon:" + str(lon)
+
+        int_marker.pose.position.x = x
+        int_marker.pose.position.y = y
+        int_marker.pose.position.z = z
+        int_marker.scale = marker_size
+
+        box_marker = Marker()
+        box_marker.type = Marker.CUBE
+        box_marker.scale.x = box_size
+        box_marker.scale.y = box_size
+        box_marker.scale.z = box_size
+        box_marker.color.r = 0.0
+        box_marker.color.g = 0.5
+        box_marker.color.b = 0.5
+        box_marker.color.a = 1.0
+
+        box_control = InteractiveMarkerControl()
+        box_control.interaction_mode = InteractiveMarkerControl.BUTTON
+        box_control.always_visible = True
+        box_control.markers.append(box_marker)
+
+        int_marker.controls.append(box_control)
+
+        server.insert(int_marker, moveFeedback)
+
+        menu_handler.apply(server, str(-1))
+
+        server.applyChanges()
+    else:
+        x, y = getXYZ(lat, lon)
+        print(x,y)
+        marker.pose.position.x = x
+        marker.pose.position.y = y
+        marker.pose.position.z = z
+        marker.description = "id:" + str(-1) + " x:"+str(x) + " y:" + \
+            str(y) + " z:" + str(z) + " lat:" + str(lat) + "  lon:" + str(lon)
+        server.insert(marker)
+        server.applyChanges()
+
 
 # def menuDeleteCallback(feedback):  # 删除当前点
 #     rospy.loginfo(feedback.marker_name)
@@ -281,6 +339,14 @@ def getGps(x, y):
     return lat, lon
 
 
+def getXYZ(lat, lon):
+    global a_x, b_x, a_y, b_y
+    x = point0.getx() + a_x * (lat-point0.getLat()) + b_x * (lon-point0.getLon())
+    y = point0.gety() + a_y * (lat-point0.getLat()) + b_y * (lon-point0.getLon())
+
+    return x, y
+
+
 def checkParam(x1, x2, y1, y2, lat1, lat2, lon1, lon2):
     if (x1 != x2) and (y1 != y2) and (lat1 != lat2) and (lon1 != lon2):
         return True
@@ -310,13 +376,28 @@ def getPathCallback(data):
         current_path = data
 
 # 测试GPS映射是否满意
+
+
 def testGpsMapping():
-    points = GPS_Point.readPoint("/home/cyr/nav_ws/src/gps_mapping/src/mark.txt")
+    points = GPS_Point.readPoint(
+        "/home/cyr/nav_ws/src/gps_mapping/src/mark.txt")
 
     for p in points:
-        lat, lon = getGps(p.getx(),p.gety())
-        print("x:" + str(p.getx()) + "  y:" + str(p.gety())+" lat:" + str(lat-p.getLat()) + "  lon:" + str(lon-p.getLon()))
+        lat, lon = getGps(p.getx(), p.gety())
+        print("x:" + str(p.getx()) + "  y:" + str(p.gety())+" lat:" +
+              str(lat-p.getLat()) + "  lon:" + str(lon-p.getLon()))
 
+# 测试反向映射是否满意
+
+
+def testXYZMapping():
+    points = GPS_Point.readPoint(
+        "/home/cyr/nav_ws/src/gps_mapping/src/mark.txt")
+
+    for p in points:
+        x, y = getXYZ(p.getLat(), p.getLon())
+        print("lat:" + str(p.getLat()) + "  lon:" + str(p.getLon())+" x:" +
+              str(x-p.getx()) + "  y:" + str(y-p.gety()))
 
 ###############################################################
 # 用于多点位导航标记
@@ -419,13 +500,14 @@ if __name__ == '__main__':
         lon2 = rospy.get_param("gps_mapping_node/lon2", 2)
         marker_size = rospy.get_param("gps_mapping_node/marker_size", 4.5)
         box_size = rospy.get_param("gps_mapping_node/box_size", 3)
-        file_path = rospy.get_param("gps_mapping_node/file_path","/home/cyr/nav_ws/src/gps_mapping/src/test.txt")
+        file_path = rospy.get_param(
+            "gps_mapping_node/file_path", "/home/cyr/nav_ws/src/gps_mapping/src/test.txt")
 
         # 判断标定点是否合法
         if checkParam(x1, x2, y1, y2, lat1, lat2, lon1, lon2):
             #     a_lat, b_lat = x_latitudeMapping(x1, lat1, x2, lat2)
             #     a_lon, b_lon = y_longitudeMapping(y1, lon1, y2, lon2)
-            a_lat, b_lat, a_lon, b_lon, point0 = GPS_Point.avg_mapping(
+            a_lat, b_lat, a_lon, b_lon, a_x, b_x, a_y, b_y, point0 = GPS_Point.avg_mapping(
                 GPS_Point.readPoint(
                     file_path))
 
@@ -446,6 +528,7 @@ if __name__ == '__main__':
                              queue_size=1)
 
             rospy.Subscriber("odom", Odometry, setOdomCallback, queue_size=1)
+            rospy.Subscriber("raw_fix", NavSatFix, setGPSCallback, queue_size=1)
 
             # start_pub = rospy.Publisher(
             #     'nav/start', PointStamped, queue_size=1)
@@ -457,7 +540,7 @@ if __name__ == '__main__':
             traj_pub = rospy.Publisher("nav/waypoints", Path,
                                        queue_size=1)  # 用于将规划好的路径清空
             xyz_pub = rospy.Publisher("xyz/path", Path,
-                                      queue_size=1)  #用于向串口发送地图坐标路径
+                                      queue_size=1)  # 用于向串口发送地图坐标路径
 
             # 创建交互式标记服务，命名空间为nav_points
             server = InteractiveMarkerServer("nav_points")
@@ -465,6 +548,7 @@ if __name__ == '__main__':
             initMenu()
 
             testGpsMapping()
+            testXYZMapping()
 
             # 关闭前清除标记
             rospy.on_shutdown(cleanPath)

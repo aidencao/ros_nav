@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # coding:utf-8
+
+
 class GPS_Point:
     # 构造函数
     def __init__(self, x, y, lat, lon):
@@ -87,12 +89,52 @@ def get_lat(x0, x1, x2, y0, y1, y2, lat0, lat1, lat2):
     return C, D
 
 
+def get_x(x0, x1, x2, lon0, lon1, lon2, lat0, lat1, lat2):
+    a1 = lat1 - lat0
+    a2 = lat2 - lat0
+    b1 = lon1 - lon0
+    b2 = lon2 - lon0
+    c1 = x1 - x0
+    c2 = x2 - x0
+
+    d = a1 * b2 - b1 * a2
+    e = c1 * b2 - b1 * c2
+    f = a1 * c2 - c1 * a2
+
+    C = e / d
+    D = f / d
+
+    return C, D
+
+
+def get_y(y0, y1, y2, lon0, lon1, lon2, lat0, lat1, lat2):
+    a1 = lat1 - lat0
+    a2 = lat2 - lat0
+    b1 = lon1 - lon0
+    b2 = lon2 - lon0
+    c1 = y1 - y0
+    c2 = y2 - y0
+
+    d = a1 * b2 - b1 * a2
+    e = c1 * b2 - b1 * c2
+    f = a1 * c2 - c1 * a2
+
+    A = e / d
+    B = f / d
+
+    return A, B
+
+
 # 建立平均值映射关系
 def avg_mapping(points):
     latalist = []
     latblist = []
     lonalist = []
     lonblist = []
+    xalist = []
+    xblist = []
+    yalist = []
+    yblist = []
 
     point0 = points[0]
 
@@ -108,6 +150,17 @@ def avg_mapping(points):
         lonalist.append(lona)
         lonblist.append(lonb)
 
+        xa, xb = get_x(point0.getx(), p[0].getx(), p[1].getx(),
+                       point0.getLon(), p[0].getLon(), p[1].getLon(),
+                       point0.getLat(), p[0].getLat(), p[1].getLat())
+        ya, yb = get_y(point0.gety(), p[0].gety(), p[1].gety(),
+                       point0.getLon(), p[0].getLon(), p[1].getLon(),
+                       point0.getLat(), p[0].getLat(), p[1].getLat())
+        xalist.append(xa)
+        xblist.append(xb)
+        yalist.append(ya)
+        yblist.append(yb)
+
     # for p in [points[i:i + 2] for i in range(0, len(points), 2)]:
     #     xa, xb = x_latitudeMapping(p[0].getx(), p[0].getLat(), p[1].getx(),
     #                                p[1].getLat())
@@ -122,8 +175,12 @@ def avg_mapping(points):
     avglatb = sum(latblist) / len(latblist)
     avglona = sum(lonalist) / len(lonalist)
     avglonb = sum(lonblist) / len(lonblist)
+    avgxa = sum(xalist) / len(xalist)
+    avgxb = sum(xblist) / len(xblist)
+    avgya = sum(yalist) / len(yalist)
+    avgyb = sum(yblist) / len(yblist)
 
-    return avglata, avglatb, avglona, avglonb, point0
+    return avglata, avglatb, avglona, avglonb, avgxa, avgxb, avgya, avgyb, point0
 
 
 # def trans(x, y):
