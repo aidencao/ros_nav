@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <!-- RViz -->
+  <node pkg="rviz" type="rviz" name="$(anon rviz)" respawn="false" output="screen" args="-d $(find rotate_map)/rviz/OctomapShow.rviz"/>
+
+  <node name="rotate_map" pkg="rotate_map" type="rotate_map">
+	  <param name="load_path" type="string" value="$(find rotate_map)/data/south_gate2.pcd"/>
+    <param name="output_path" type="string" value="$(find rotate_map)/data/south_gate2.pcd"/>
+	  <param name="frame_id" type="string" value="map"/>
+	  <param name="topic" type="string" value="/pointcloud/output"/>
+    <param name="rotatex" type="double" value="0"/>
+    <param name="rotatey" type="double" value="0"/>
+    <param name="rotatez" type="double" value="0"/>
+    <param name="movex" type="double" value="10"/>
+    <param name="movey" type="double" value="0"/>
+    <param name="movez" type="double" value="0"/>
+  </node>
+
+</launch>
+
+ 
+
+		
+ 

@@ -2,7 +2,7 @@
 <launch>
  
   <node name="publish_pointcloud" pkg="publish_pointcloud" type="publish_pointcloud">
-	  <param name="path" type="string" value="$(find publish_pointcloud)/data/cyr_normal.pcd"/>
+	  <param name="path" type="string" value="$(find publish_pointcloud)/data/south_gate2.pcd"/>
 	  <param name="frame_id" type="string" value="map"/>
 	  <param name="topic" type="string" value="/pointcloud/output"/>
 	  <param name="hz" type="int" value="2"/>
