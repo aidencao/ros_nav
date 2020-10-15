@@ -14,8 +14,8 @@
     <param name="movex" type="double" value="10"/>
     <param name="movey" type="double" value="0"/>
     <param name="movez" type="double" value="0"/>
+ <param name="point_path" type="string" value="$(find rotate_map)/data/point.txt"/>
   </node>
-
 </launch>
 
  

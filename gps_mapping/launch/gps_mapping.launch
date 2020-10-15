@@ -10,7 +10,11 @@
         <param name="lon1" type="double" value="103.9246926"/>
         <param name="lat2" type="double" value="30.7489405"/>
         <param name="lon2" type="double" value="103.9250616"/>
-        <param name="file_path" type="string" value="/home/cyr/nav_ws/src/gps_mapping/src/test.txt"/>
+
+
+
+        
+        <param name="file_path" type="string" value="/home/cjz/nav_ws/src/gps_mapping/src/test_7.14.txt"/>
         <param name="marker_size" type="double" value="4.5"/>
         <param name="box_size" type="double" value="3"/>
     </node>

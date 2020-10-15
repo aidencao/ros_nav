@@ -6,7 +6,7 @@
         <param name="uavw" type="double" value="1"/>
         <param name="uavh" type="double" value="1"/>
         <param name="octo_resolution" type="double" value="5"/>
-        <param name="bound_xy" type="double" value="8000.0"/>
+        <param name="bound_xy" type="double" value="400.0"/>
         <param name="bound_lowz" type="double" value="0.0"/>
         <param name="bound_highz" type="double" value="100"/>
         <param name="step_range" type="double" value="1"/>

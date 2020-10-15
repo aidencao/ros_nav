@@ -1,8 +1,9 @@
-#ifndef _ALEX_SERIALPORT_H
-#define _ALEX_SERIALPORT_H
+#ifndef SERIAL_PORT_DRIVER_H
+#define SERIAL_PORT_DRIVER_H
 
-#include "uavInc.h"
 #include "uavtype.h"
+#include "uav_inc.h"
+
 
 int Alex_SerialPort_Close();
 int Alex_SerialPort_BufferClear();
@@ -11,6 +12,4 @@ int Alex_SerialPort_Send(const char *buf, size_t len);
 int Alex_SerialPort_Recv(char *buf, size_t len);
 int Alex_SerialPort_Setup(const char *device, int baudrate);
 
-
-#endif
-
+#endif // SERIAL_PORT_DRIVER_H

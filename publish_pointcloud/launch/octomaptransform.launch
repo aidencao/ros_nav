@@ -22,6 +22,6 @@
   <!-- Load ocotmap launch -->
   <include file="$(find path_planner)/launch/path_planner.launch" />
   <include file="$(find gps_mapping)/launch/gps_mapping.launch" />
-  <!-- <include file="$(find uav_communication)/launch/uav_communication.launch" /> -->
+  <include file="$(find uav_communication)/launch/uav_communication.launch" />
   <include file="$(find publish_pointcloud)/launch/demo.launch" />
 </launch>

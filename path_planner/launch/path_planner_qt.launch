@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="uavl" default = "1" />
+    <arg name="uavw" default = "1" />
+    <arg name="uavh" default = "1" />
+    <arg name="resolution" default = "5" />
+    <arg name="bound_xy" default = "400.0" />
+    <arg name="bound_lowz" default = "0.0" />
+    <arg name="bound_highz" default = "100" />
+    <arg name="step_range" default = "1" />
+
+    <node pkg="path_planner" type="path_planner_node" name="path_planner_node" output="screen">
+        <!-- 分别使用一号点和三号点进行标定 -->
+        <param name="uavl" type="double" value="$(arg uavl)"/>
+        <param name="uavw" type="double" value="$(arg uavw)"/>
+        <param name="uavh" type="double" value="$(arg uavh)"/>
+        <param name="octo_resolution" type="double" value="$(arg resolution)"/>
+        <param name="bound_xy" type="double" value="$(arg bound_xy)"/>
+        <param name="bound_lowz" type="double" value="$(arg bound_lowz)"/>
+        <param name="bound_highz" type="double" value="$(arg bound_highz)"/>
+        <param name="step_range" type="double" value="$(arg step_range)"/>
+    </node>
+</launch>

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <node pkg="gps_mapping" type="GPS_Mark.py" name="GPS_mark_node" output="screen">
-        <param name="file_path" type="string" value="/home/cyr/nav_ws/src/gps_mapping/src/testmark.txt"/>
+        <param name="file_path" type="string" value="/home/cjz/nav_ws/src/gps_mapping/src/mark7.14.txt"/>
         <param name="pose_topic" type="string" value="/current_pose"/>
         <param name="gps_topic" type="string" value="/raw_fix"/>
         <param name="write_topic" type="string" value="/write"/>

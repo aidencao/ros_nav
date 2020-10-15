@@ -10,6 +10,10 @@ class GPS_Point:
         self.lat = lat
         self.lon = lon
 
+#lat 经度  和 lon 纬度 
+
+
+
     def getx(self):
         return self.x
 
