@@ -36,6 +36,7 @@ public:
     static void send_lidar_nav_reset_max_vel_cmd(const std_msgs::Float64::ConstPtr &ros_msg);
     static void send_lidar_nav_change_mode_cmd(const std_msgs::UInt8::ConstPtr &ros_msg);
     static void send_landing_info_cmd(const std_msgs::String::ConstPtr &ros_msg);
+    static void send_landing_start_cmd(const std_msgs::Bool::ConstPtr &ros_msg);
 
 private:
     SerialPortSend();

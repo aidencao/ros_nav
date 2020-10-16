@@ -17,6 +17,7 @@ ros::Publisher RosTopicSendRecv::uav_local_pos_pub;
 ros::Publisher RosTopicSendRecv::lidar_nav_rel_pos_pub;
 ros::Publisher RosTopicSendRecv::lidar_nav_computed_vel_pub;
 ros::Publisher RosTopicSendRecv::lidar_nav_odom_pub;
+ros::Publisher RosTopicSendRecv::landing_info_pub;
 
 //
 ros::Subscriber RosTopicSendRecv::takeoff_sub;
@@ -36,6 +37,8 @@ ros::Subscriber RosTopicSendRecv::resume_lidar_nav_sub;
 ros::Subscriber RosTopicSendRecv::cancel_lidar_nav_sub;
 ros::Subscriber RosTopicSendRecv::reset_lidar_nav_max_vel_sub;
 ros::Subscriber RosTopicSendRecv::change_lidar_nav_fligt_mode_sub;
+ros::Subscriber RosTopicSendRecv::landing_info_sub;
+ros::Subscriber RosTopicSendRecv::landing_start_sub;
 
 //发布日志信息给Qt
 void RosTopicSendRecv::pub_uav_log_info(const string &loginfo)
@@ -95,7 +98,9 @@ void RosTopicSendRecv::pub_lidar_nav_odom(const nav_msgs::Odometry &uav_odom)
 
 void RosTopicSendRecv::pub_landing_info()
 {
-    landing_info_pub.publish("");
+    std_msgs::String info;
+    info.data = "uav need data";
+    landing_info_pub.publish(info);
 }
 
 void RosTopicSendRecv::init(void)
@@ -138,4 +143,5 @@ void RosTopicSendRecv::init(void)
     change_lidar_nav_fligt_mode_sub = nh.subscribe("/lidar_nav_change_mode", 1, SerialPortSend::send_lidar_nav_change_mode_cmd);
     //降落sub
     landing_info_sub = nh.subscribe("/landing_send", 1, SerialPortSend::send_landing_info_cmd);
+    landing_start_sub = nh.subscribe("/qt_landing_start", 1, SerialPortSend::send_landing_start_cmd);
 }

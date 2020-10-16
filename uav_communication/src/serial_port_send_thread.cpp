@@ -526,6 +526,28 @@ void SerialPortSend::send_landing_info_cmd(const std_msgs::String::ConstPtr &ros
     AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
 }
 
+void SerialPortSend::send_landing_start_cmd(const std_msgs::Bool::ConstPtr &ros_msg)
+{
+    ROS_INFO("in SerialPortSend::send_landing_start_cmd");
+
+    const UINT32 REAL_DATA_LEN = 0;
+    const UINT32 DATA_LEN = CRC16_BYTES + REAL_DATA_LEN;
+    const UINT32 MSG_LEN = MSG_HEAD_STRUCT_LEN + DATA_LEN;
+
+    char msg[MSG_LEN];
+    MsgHead *pMsg = (MsgHead *)msg;
+    pMsg->identity1 = MSG_IDENTITY1;
+    pMsg->identity2 = MSG_IDENTITY2;
+    pMsg->len = MSG_DATA_START_LEN + DATA_LEN;
+    pMsg->direction = GROUND_STATION_TO_FLIGHT;
+    pMsg->type = MESSAGE_ANALYSIS_SEND_LANDING_START;
+
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
+    refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
+
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
+}
+
 //向串口发送数据到buffer为空为止
 void SerialPortSend::SendBufferQueueToSerialPort()
 {

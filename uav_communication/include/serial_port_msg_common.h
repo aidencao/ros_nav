@@ -33,6 +33,7 @@ enum MESSAGE_DIRECTION_ENUM {
 enum MESSAGE_ANALYSIS_ENUM {
     MESSAGE_ANALYSIS_FLIGHT_CONTROL                 = 0x10, //起飞、降落、gohome
     MESSAGE_ANALYSIS_ACTIVATE_WAYPOINT_MISSION      = 0x20,
+    MESSAGE_ANALYSIS_SEND_LANDING_START             = 0x36, //高精度降落开始
     MESSAGE_ANALYSIS_SEND_LANDING_INFO              = 0x37,  //高精度降落发送消息
     MESSAGE_ANALYSIS_SET_ALTITUDE                   = 0x40, //设置飞机高度
     MESSAGE_ANALYSIS_HEART_BEAT                     = 0x48, //心跳

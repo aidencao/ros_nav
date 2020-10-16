@@ -66,6 +66,7 @@ private:
     static ros::Subscriber reset_lidar_nav_max_vel_sub;
     static ros::Subscriber change_lidar_nav_fligt_mode_sub;
     static ros::Subscriber landing_info_sub;
+    static ros::Subscriber landing_start_sub;
 };
 
 #endif
