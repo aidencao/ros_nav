@@ -6,7 +6,6 @@
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float64.h>
 
-
 //
 ros::Publisher RosTopicSendRecv::log_info_pub;
 ros::Publisher RosTopicSendRecv::gps_info_pub;
@@ -38,62 +37,65 @@ ros::Subscriber RosTopicSendRecv::cancel_lidar_nav_sub;
 ros::Subscriber RosTopicSendRecv::reset_lidar_nav_max_vel_sub;
 ros::Subscriber RosTopicSendRecv::change_lidar_nav_fligt_mode_sub;
 
-
-
 //发布日志信息给Qt
-void RosTopicSendRecv::pub_uav_log_info(const string& loginfo)
+void RosTopicSendRecv::pub_uav_log_info(const string &loginfo)
 {
     std_msgs::String logstr;
     logstr.data = loginfo;
     log_info_pub.publish(logstr);
 }
 
-void RosTopicSendRecv::pub_uav_gps_info(const sensor_msgs::NavSatFix& gpsinfo)
+void RosTopicSendRecv::pub_uav_gps_info(const sensor_msgs::NavSatFix &gpsinfo)
 {
     ROS_INFO("in RosTopicSendRecv::pub_uav_gps_info");
     gps_info_pub.publish(gpsinfo);
 }
 
-void RosTopicSendRecv::pub_current_gps_pose(const sensor_msgs::NavSatFix& gpsinfo)
+void RosTopicSendRecv::pub_current_gps_pose(const sensor_msgs::NavSatFix &gpsinfo)
 {
     ROS_INFO("in RosTopicSendRecv::pub_current_gps_pose");
     current_gps_pose_pub.publish(gpsinfo);
 }
 
-void RosTopicSendRecv::pub_uav_gps_health(const std_msgs::UInt8& gps_health)
+void RosTopicSendRecv::pub_uav_gps_health(const std_msgs::UInt8 &gps_health)
 {
     gps_health_pub.publish(gps_health);
 }
 
-void RosTopicSendRecv::pub_uav_velocity_info(const geometry_msgs::Vector3Stamped& uav_vel)
+void RosTopicSendRecv::pub_uav_velocity_info(const geometry_msgs::Vector3Stamped &uav_vel)
 {
     uav_vel_pub.publish(uav_vel);
 }
 
-void RosTopicSendRecv::pub_height_above_takeoff(const std_msgs::Float32& height)
+void RosTopicSendRecv::pub_height_above_takeoff(const std_msgs::Float32 &height)
 {
     height_above_takeoff_pub.publish(height);
 }
 
-void RosTopicSendRecv::pub_uav_local_pos(const geometry_msgs::PointStamped& local_pos)
+void RosTopicSendRecv::pub_uav_local_pos(const geometry_msgs::PointStamped &local_pos)
 {
     ROS_INFO("in RosTopicSendRecv::pub_uav_local_pos");
     uav_local_pos_pub.publish(local_pos);
 }
 
-void RosTopicSendRecv::pub_lidar_nav_rel_pos(const geometry_msgs::PointStamped& rel_pos)
+void RosTopicSendRecv::pub_lidar_nav_rel_pos(const geometry_msgs::PointStamped &rel_pos)
 {
     lidar_nav_rel_pos_pub.publish(rel_pos);
 }
 
-void RosTopicSendRecv::pub_lidar_nav_computed_vel(const geometry_msgs::Vector3Stamped& uav_vel)
+void RosTopicSendRecv::pub_lidar_nav_computed_vel(const geometry_msgs::Vector3Stamped &uav_vel)
 {
     lidar_nav_computed_vel_pub.publish(uav_vel);
 }
 
-void RosTopicSendRecv::pub_lidar_nav_odom(const nav_msgs::Odometry& uav_odom)
+void RosTopicSendRecv::pub_lidar_nav_odom(const nav_msgs::Odometry &uav_odom)
 {
     lidar_nav_odom_pub.publish(uav_odom);
+}
+
+void RosTopicSendRecv::pub_landing_info()
+{
+    landing_info_pub.publish("");
 }
 
 void RosTopicSendRecv::init(void)
@@ -111,6 +113,8 @@ void RosTopicSendRecv::init(void)
     lidar_nav_rel_pos_pub = nh.advertise<geometry_msgs::PointStamped>("/lidar_nav_rel_pos", 1);
     lidar_nav_computed_vel_pub = nh.advertise<geometry_msgs::Vector3Stamped>("/lidar_nav_computed_vel", 1);
     lidar_nav_odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 1);
+    //降落pub
+    landing_info_pub = nh.advertise<std_msgs::String>("/landing_recv", 1);
 
     //sub
     takeoff_sub = nh.subscribe("/uav_take_off", 1, &SerialPortSend::send_takeoff_cmd);
@@ -132,5 +136,6 @@ void RosTopicSendRecv::init(void)
     cancel_lidar_nav_sub = nh.subscribe("/lidar_nav_cancel", 1, SerialPortSend::send_lidar_nav_cancel_cmd);
     reset_lidar_nav_max_vel_sub = nh.subscribe("/lidar_nav_set_max_vel", 1, SerialPortSend::send_lidar_nav_reset_max_vel_cmd);
     change_lidar_nav_fligt_mode_sub = nh.subscribe("/lidar_nav_change_mode", 1, SerialPortSend::send_lidar_nav_change_mode_cmd);
+    //降落sub
+    landing_info_sub = nh.subscribe("/landing_send", 1, SerialPortSend::send_landing_info_cmd);
 }
-

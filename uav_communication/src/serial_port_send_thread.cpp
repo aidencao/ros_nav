@@ -6,11 +6,9 @@
 #include "heart_beat.h"
 #include <geometry_msgs/Pose.h>
 
-
 //send buffer
 queue<string> SerialPortSend::send_buffer_queue;
 pthread_mutex_t SerialPortSend::send_buffer_queue_lock;
-
 
 //send buff
 void SerialPortSend::AddMsgToSendBuffer(const string &str)
@@ -37,14 +35,14 @@ string SerialPortSend::getMsgFromSendBufferQueue(void)
     return tmpstr;
 }
 
-void SerialPortSend::send_stop_move_cmd(const std_msgs::Bool::ConstPtr& ros_msg)
+void SerialPortSend::send_stop_move_cmd(const std_msgs::Bool::ConstPtr &ros_msg)
 {
     const UINT32 REAL_DATA_LEN = 1;
     const UINT32 DATA_LEN = CRC16_BYTES + REAL_DATA_LEN;
     const UINT32 MSG_LEN = MSG_HEAD_STRUCT_LEN + DATA_LEN;
 
     char msg[MSG_LEN];
-    MsgHead *pMsg = (MsgHead *)msg;    
+    MsgHead *pMsg = (MsgHead *)msg;
     pMsg->identity1 = MSG_IDENTITY1;
     pMsg->identity2 = MSG_IDENTITY2;
     pMsg->len = MSG_DATA_START_LEN + DATA_LEN;
@@ -54,16 +52,16 @@ void SerialPortSend::send_stop_move_cmd(const std_msgs::Bool::ConstPtr& ros_msg)
     bool &refVal = *((bool *)pMsg->data);
     refVal = ros_msg->data;
 
-    UINT16 &refCrc =  *((UINT16*)&pMsg->data[REAL_DATA_LEN]);
-    refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN+REAL_DATA_LEN);
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
+    refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
 
-    AddMsgToSendBuffer( string(&msg[0], &msg[MSG_LEN]) );
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
 }
 
 //发送激活信息给无人机端
 void SerialPortSend::send_waypoint_activation_cmd(const std_msgs::String::ConstPtr ros_msg)
 {
-    ROS_INFO("in send_waypoint_activation_cmd"); 
+    ROS_INFO("in send_waypoint_activation_cmd");
     const UINT32 REAL_DATA_LEN = 0;
     const UINT32 DATA_LEN = CRC16_BYTES + REAL_DATA_LEN;
     const UINT32 MSG_LEN = MSG_HEAD_STRUCT_LEN + DATA_LEN;
@@ -76,13 +74,13 @@ void SerialPortSend::send_waypoint_activation_cmd(const std_msgs::String::ConstP
     pMsg->direction = GROUND_STATION_TO_FLIGHT;
     pMsg->type = MESSAGE_ANALYSIS_ACTIVATE_WAYPOINT_MISSION;
 
-    UINT16 &refCrc = *((UINT16*)&pMsg->data[REAL_DATA_LEN]);
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
     refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
 
-    AddMsgToSendBuffer( string(&msg[0], &msg[MSG_LEN]) );     
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
 }
 
-void SerialPortSend::send_haltManifold_cmd(const std_msgs::Bool::ConstPtr& ros_msg)
+void SerialPortSend::send_haltManifold_cmd(const std_msgs::Bool::ConstPtr &ros_msg)
 {
     const UINT32 REAL_DATA_LEN = 0;
     const UINT32 DATA_LEN = CRC16_BYTES + REAL_DATA_LEN;
@@ -96,23 +94,22 @@ void SerialPortSend::send_haltManifold_cmd(const std_msgs::Bool::ConstPtr& ros_m
     pMsg->direction = GROUND_STATION_TO_FLIGHT;
     pMsg->type = MESSAGE_ANALYSIS_SHUTDOWN_MANIFOLD;
 
-    UINT16 &refCrc = *((UINT16*)&pMsg->data[REAL_DATA_LEN]);
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
     refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
 
-    AddMsgToSendBuffer( string(&msg[0], &msg[MSG_LEN]) );
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
 }
 
-
-void SerialPortSend::send_takeoff_cmd(const std_msgs::Bool::ConstPtr& ros_msg)
+void SerialPortSend::send_takeoff_cmd(const std_msgs::Bool::ConstPtr &ros_msg)
 {
     ROS_INFO("in SerialPortSend::send_takeoff_cmd");
 
     const UINT32 REAL_DATA_LEN = 1;
     const UINT32 DATA_LEN = CRC16_BYTES + REAL_DATA_LEN;
     const UINT32 MSG_LEN = MSG_HEAD_STRUCT_LEN + DATA_LEN;
-    
+
     char msg[MSG_LEN];
-    MsgHead *pMsg = (MsgHead *)msg;    
+    MsgHead *pMsg = (MsgHead *)msg;
     pMsg->identity1 = MSG_IDENTITY1;
     pMsg->identity2 = MSG_IDENTITY2;
     pMsg->len = MSG_DATA_START_LEN + DATA_LEN;
@@ -122,20 +119,20 @@ void SerialPortSend::send_takeoff_cmd(const std_msgs::Bool::ConstPtr& ros_msg)
     UINT8 &refVal = *((UINT8 *)pMsg->data);
     refVal = MESSAGE_FLIGHT_CONTROL_TAKE_OFF;
 
-    UINT16 &refCrc = *((UINT16*)&pMsg->data[REAL_DATA_LEN]);
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
     refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
 
-    AddMsgToSendBuffer( string(&msg[0], &msg[MSG_LEN]) );
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
 }
 
-void SerialPortSend::send_land_cmd(const std_msgs::Bool::ConstPtr& ros_msg)
+void SerialPortSend::send_land_cmd(const std_msgs::Bool::ConstPtr &ros_msg)
 {
     const UINT32 REAL_DATA_LEN = 1;
     const UINT32 DATA_LEN = CRC16_BYTES + REAL_DATA_LEN;
     const UINT32 MSG_LEN = MSG_HEAD_STRUCT_LEN + DATA_LEN;
-    
+
     char msg[MSG_LEN];
-    MsgHead *pMsg = (MsgHead *)msg;    
+    MsgHead *pMsg = (MsgHead *)msg;
     pMsg->identity1 = MSG_IDENTITY1;
     pMsg->identity2 = MSG_IDENTITY2;
     pMsg->len = MSG_DATA_START_LEN + DATA_LEN;
@@ -145,20 +142,20 @@ void SerialPortSend::send_land_cmd(const std_msgs::Bool::ConstPtr& ros_msg)
     UINT8 &refVal = *((UINT8 *)pMsg->data);
     refVal = MESSAGE_FLIGHT_CONTROL_LAND;
 
-    UINT16 &refCrc = *((UINT16*)&pMsg->data[REAL_DATA_LEN]);
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
     refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
 
-    AddMsgToSendBuffer( string(&msg[0], &msg[MSG_LEN]) );
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
 }
 
-void SerialPortSend::send_gohome_cmd(const std_msgs::Bool::ConstPtr& ros_msg)
+void SerialPortSend::send_gohome_cmd(const std_msgs::Bool::ConstPtr &ros_msg)
 {
     const UINT32 REAL_DATA_LEN = 1;
     const UINT32 DATA_LEN = CRC16_BYTES + REAL_DATA_LEN;
     const UINT32 MSG_LEN = MSG_HEAD_STRUCT_LEN + DATA_LEN;
-    
+
     char msg[MSG_LEN];
-    MsgHead *pMsg = (MsgHead *)msg;    
+    MsgHead *pMsg = (MsgHead *)msg;
     pMsg->identity1 = MSG_IDENTITY1;
     pMsg->identity2 = MSG_IDENTITY2;
     pMsg->len = MSG_DATA_START_LEN + DATA_LEN;
@@ -168,21 +165,20 @@ void SerialPortSend::send_gohome_cmd(const std_msgs::Bool::ConstPtr& ros_msg)
     UINT8 &refVal = *((UINT8 *)pMsg->data);
     refVal = MESSAGE_FLIGHT_CONTROL_GO_HOME;
 
-    UINT16 &refCrc = *((UINT16*)&pMsg->data[REAL_DATA_LEN]);
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
     refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
 
-    AddMsgToSendBuffer( string(&msg[0], &msg[MSG_LEN]) );
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
 }
 
-
-void SerialPortSend::send_resetHeight_cmd(const std_msgs::Float64::ConstPtr& ros_msg)
+void SerialPortSend::send_resetHeight_cmd(const std_msgs::Float64::ConstPtr &ros_msg)
 {
     const UINT32 REAL_DATA_LEN = sizeof(double);
     const UINT32 DATA_LEN = CRC16_BYTES + REAL_DATA_LEN;
     const UINT32 MSG_LEN = MSG_HEAD_STRUCT_LEN + DATA_LEN;
-    
+
     char msg[MSG_LEN];
-    MsgHead *pMsg = (MsgHead *)msg;    
+    MsgHead *pMsg = (MsgHead *)msg;
     pMsg->identity1 = MSG_IDENTITY1;
     pMsg->identity2 = MSG_IDENTITY2;
     pMsg->len = MSG_DATA_START_LEN + DATA_LEN;
@@ -192,10 +188,10 @@ void SerialPortSend::send_resetHeight_cmd(const std_msgs::Float64::ConstPtr& ros
     double &refVal = *((double *)pMsg->data);
     refVal = ros_msg->data;
 
-    UINT16 &refCrc = *((UINT16*)&pMsg->data[REAL_DATA_LEN]);
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
     refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
 
-    AddMsgToSendBuffer( string(&msg[0], &msg[MSG_LEN]) );
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
 }
 
 void SerialPortSend::SendHeartBeatMsg(void)
@@ -203,19 +199,19 @@ void SerialPortSend::SendHeartBeatMsg(void)
     const UINT32 REAL_DATA_LEN = 0;
     const UINT32 DATA_LEN = CRC16_BYTES + REAL_DATA_LEN;
     const UINT32 MSG_LEN = MSG_HEAD_STRUCT_LEN + DATA_LEN;
-    
+
     char msg[MSG_LEN];
-    MsgHead *pMsg = (MsgHead *)msg;    
+    MsgHead *pMsg = (MsgHead *)msg;
     pMsg->identity1 = MSG_IDENTITY1;
     pMsg->identity2 = MSG_IDENTITY2;
     pMsg->len = MSG_DATA_START_LEN + DATA_LEN;
     pMsg->direction = GROUND_STATION_TO_FLIGHT;
     pMsg->type = MESSAGE_ANALYSIS_HEART_BEAT;
 
-    UINT16 &refCrc = *((UINT16*)&pMsg->data[REAL_DATA_LEN]);
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
     refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
 
-    AddMsgToSendBuffer( string(&msg[0], &msg[MSG_LEN]) );
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
 }
 
 // 发送地图坐标路径
@@ -226,7 +222,7 @@ void SerialPortSend::send_xyz_path_cmd(const nav_msgs::Path::ConstPtr &path)
     const UINT32 MSG_LEN = MSG_HEAD_STRUCT_LEN + DATA_LEN;
 
     char msg[MSG_LEN];
-    MsgHead *pMsg = (MsgHead *)msg;    
+    MsgHead *pMsg = (MsgHead *)msg;
     pMsg->identity1 = MSG_IDENTITY1;
     pMsg->identity2 = MSG_IDENTITY2;
     pMsg->len = MSG_DATA_START_LEN + DATA_LEN;
@@ -238,17 +234,17 @@ void SerialPortSend::send_xyz_path_cmd(const nav_msgs::Path::ConstPtr &path)
 
     for (int i = 0; i < path->poses.size(); i++)
     {
-        geometry_msgs::Point *ppoint = (geometry_msgs::Point*)&pMsg->data[i*sizeof(geometry_msgs::Point) + 1];
+        geometry_msgs::Point *ppoint = (geometry_msgs::Point *)&pMsg->data[i * sizeof(geometry_msgs::Point) + 1];
         ppoint->x = path->poses[i].pose.position.x;
         ppoint->y = path->poses[i].pose.position.y;
         ppoint->z = path->poses[i].pose.position.z;
         ROS_INFO("x is : %lf,y is : %lf,z is : %lf", ppoint->x, ppoint->y, ppoint->z);
     }
 
-    UINT16 &refCrc = *((UINT16*)&pMsg->data[REAL_DATA_LEN]);
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
     refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
-    
-    AddMsgToSendBuffer( string(&msg[0], &msg[MSG_LEN]) ); 
+
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
 }
 
 // 接收到GPS_Waypoints信息
@@ -290,11 +286,11 @@ void SerialPortSend::send_waypoints_cmd(const std_msgs::String::ConstPtr ros_msg
 
     *(UINT16 *)(&pack_bytes[idx]) = (UINT16)crc16(&pack_bytes[SND_MSG_HEAD_LEN], idx - SND_MSG_HEAD_LEN); //crc16
     idx += CRC16_BYTES;
-    AddMsgToSendBuffer( string(&pack_bytes[0], &pack_bytes[idx]) );
+    AddMsgToSendBuffer(string(&pack_bytes[0], &pack_bytes[idx]));
 }
 
 //发送初始点定位点给无人机端
-void SerialPortSend::send_lidar_nav_init_pose_point_cmd(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& init_pose)
+void SerialPortSend::send_lidar_nav_init_pose_point_cmd(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr &init_pose)
 {
     ROS_INFO("in send_lidar_nav_init_pose_point_cmd");
     const UINT32 REAL_DATA_LEN = sizeof(geometry_msgs::PoseWithCovarianceStamped);
@@ -302,7 +298,7 @@ void SerialPortSend::send_lidar_nav_init_pose_point_cmd(const geometry_msgs::Pos
     const UINT32 MSG_LEN = MSG_HEAD_STRUCT_LEN + DATA_LEN;
 
     char msg[MSG_LEN];
-    MsgHead *pMsg = (MsgHead *)msg;    
+    MsgHead *pMsg = (MsgHead *)msg;
     pMsg->identity1 = MSG_IDENTITY1;
     pMsg->identity2 = MSG_IDENTITY2;
     pMsg->len = MSG_DATA_START_LEN + DATA_LEN;
@@ -312,13 +308,13 @@ void SerialPortSend::send_lidar_nav_init_pose_point_cmd(const geometry_msgs::Pos
     //这个指针不能直接用，要先取值在取地址
     memcpy(pMsg->data, &(*init_pose), sizeof(geometry_msgs::PoseWithCovarianceStamped));
 
-    UINT16 &refCrc =  *((UINT16*)&pMsg->data[REAL_DATA_LEN]);
-    refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN+REAL_DATA_LEN);
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
+    refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
 
-    AddMsgToSendBuffer( string(&msg[0], &msg[MSG_LEN]) );    
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
 }
 
-void SerialPortSend::send_lidar_nav_goal_cmd(const geometry_msgs::PoseStamped::ConstPtr& nav_goal)
+void SerialPortSend::send_lidar_nav_goal_cmd(const geometry_msgs::PoseStamped::ConstPtr &nav_goal)
 {
     ROS_INFO("in send_lidar_nav_goal_cmd");
     const UINT32 REAL_DATA_LEN = sizeof(geometry_msgs::PoseStamped);
@@ -326,7 +322,7 @@ void SerialPortSend::send_lidar_nav_goal_cmd(const geometry_msgs::PoseStamped::C
     const UINT32 MSG_LEN = MSG_HEAD_STRUCT_LEN + DATA_LEN;
 
     char msg[MSG_LEN];
-    MsgHead *pMsg = (MsgHead *)msg;    
+    MsgHead *pMsg = (MsgHead *)msg;
     pMsg->identity1 = MSG_IDENTITY1;
     pMsg->identity2 = MSG_IDENTITY2;
     pMsg->len = MSG_DATA_START_LEN + DATA_LEN;
@@ -336,109 +332,108 @@ void SerialPortSend::send_lidar_nav_goal_cmd(const geometry_msgs::PoseStamped::C
     //这个指针不能直接用，要先取值在取地址
     memcpy(pMsg->data, &(*nav_goal), sizeof(geometry_msgs::PoseStamped));
 
-    UINT16 &refCrc =  *((UINT16*)&pMsg->data[REAL_DATA_LEN]);
-    refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN+REAL_DATA_LEN);
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
+    refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
 
-    AddMsgToSendBuffer( string(&msg[0], &msg[MSG_LEN]) );
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
 }
 
-void SerialPortSend::send_lidar_nav_activate_cmd(const std_msgs::Bool::ConstPtr& ros_msg)
+void SerialPortSend::send_lidar_nav_activate_cmd(const std_msgs::Bool::ConstPtr &ros_msg)
 {
     ROS_INFO("in SerialPortSend::send_lidar_nav_activate_cmd");
 
     const UINT32 REAL_DATA_LEN = 0;
     const UINT32 DATA_LEN = CRC16_BYTES + REAL_DATA_LEN;
     const UINT32 MSG_LEN = MSG_HEAD_STRUCT_LEN + DATA_LEN;
-    
+
     char msg[MSG_LEN];
-    MsgHead *pMsg = (MsgHead *)msg;    
+    MsgHead *pMsg = (MsgHead *)msg;
     pMsg->identity1 = MSG_IDENTITY1;
     pMsg->identity2 = MSG_IDENTITY2;
     pMsg->len = MSG_DATA_START_LEN + DATA_LEN;
     pMsg->direction = GROUND_STATION_TO_FLIGHT;
     pMsg->type = MESSAGE_ANALYSIS_ACTIVATE_LIDAR_NAV_MISSION;
 
-    UINT16 &refCrc = *((UINT16*)&pMsg->data[REAL_DATA_LEN]);
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
     refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
 
-    AddMsgToSendBuffer( string(&msg[0], &msg[MSG_LEN]) );
-
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
 }
 
-void SerialPortSend::send_lidar_nav_pause_cmd(const std_msgs::Bool::ConstPtr& ros_msg)
+void SerialPortSend::send_lidar_nav_pause_cmd(const std_msgs::Bool::ConstPtr &ros_msg)
 {
     ROS_INFO("in SerialPortSend::send_lidar_nav_pause_cmd");
 
     const UINT32 REAL_DATA_LEN = 0;
     const UINT32 DATA_LEN = CRC16_BYTES + REAL_DATA_LEN;
     const UINT32 MSG_LEN = MSG_HEAD_STRUCT_LEN + DATA_LEN;
-    
+
     char msg[MSG_LEN];
-    MsgHead *pMsg = (MsgHead *)msg;    
+    MsgHead *pMsg = (MsgHead *)msg;
     pMsg->identity1 = MSG_IDENTITY1;
     pMsg->identity2 = MSG_IDENTITY2;
     pMsg->len = MSG_DATA_START_LEN + DATA_LEN;
     pMsg->direction = GROUND_STATION_TO_FLIGHT;
     pMsg->type = MESSAGE_ANALYSIS_PAUSE_LIDAR_NAV_MISSION;
 
-    UINT16 &refCrc = *((UINT16*)&pMsg->data[REAL_DATA_LEN]);
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
     refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
 
-    AddMsgToSendBuffer( string(&msg[0], &msg[MSG_LEN]) );
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
 }
 
-void SerialPortSend::send_lidar_nav_resume_cmd(const std_msgs::Bool::ConstPtr& ros_msg)
+void SerialPortSend::send_lidar_nav_resume_cmd(const std_msgs::Bool::ConstPtr &ros_msg)
 {
     ROS_INFO("in SerialPortSend::send_lidar_nav_resume_cmd");
 
     const UINT32 REAL_DATA_LEN = 0;
     const UINT32 DATA_LEN = CRC16_BYTES + REAL_DATA_LEN;
     const UINT32 MSG_LEN = MSG_HEAD_STRUCT_LEN + DATA_LEN;
-    
+
     char msg[MSG_LEN];
-    MsgHead *pMsg = (MsgHead *)msg;    
+    MsgHead *pMsg = (MsgHead *)msg;
     pMsg->identity1 = MSG_IDENTITY1;
     pMsg->identity2 = MSG_IDENTITY2;
     pMsg->len = MSG_DATA_START_LEN + DATA_LEN;
     pMsg->direction = GROUND_STATION_TO_FLIGHT;
     pMsg->type = MESSAGE_ANALYSIS_RESUME_LIDAR_NAV_MISSION;
 
-    UINT16 &refCrc = *((UINT16*)&pMsg->data[REAL_DATA_LEN]);
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
     refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
 
-    AddMsgToSendBuffer( string(&msg[0], &msg[MSG_LEN]) );
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
 }
 
-void SerialPortSend::send_lidar_nav_cancel_cmd(const std_msgs::Bool::ConstPtr& ros_msg)
+void SerialPortSend::send_lidar_nav_cancel_cmd(const std_msgs::Bool::ConstPtr &ros_msg)
 {
     ROS_INFO("in SerialPortSend::send_lidar_nav_cancel_cmd");
 
     const UINT32 REAL_DATA_LEN = 0;
     const UINT32 DATA_LEN = CRC16_BYTES + REAL_DATA_LEN;
     const UINT32 MSG_LEN = MSG_HEAD_STRUCT_LEN + DATA_LEN;
-    
+
     char msg[MSG_LEN];
-    MsgHead *pMsg = (MsgHead *)msg;    
+    MsgHead *pMsg = (MsgHead *)msg;
     pMsg->identity1 = MSG_IDENTITY1;
     pMsg->identity2 = MSG_IDENTITY2;
     pMsg->len = MSG_DATA_START_LEN + DATA_LEN;
     pMsg->direction = GROUND_STATION_TO_FLIGHT;
     pMsg->type = MESSAGE_ANALYSIS_CANCEL_LIDAR_NAV_MISSION;
 
-    UINT16 &refCrc = *((UINT16*)&pMsg->data[REAL_DATA_LEN]);
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
     refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
 
-    AddMsgToSendBuffer( string(&msg[0], &msg[MSG_LEN]) );
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
 }
 
-void SerialPortSend::send_lidar_nav_reset_max_vel_cmd(const std_msgs::Float64::ConstPtr& ros_msg)
+void SerialPortSend::send_lidar_nav_reset_max_vel_cmd(const std_msgs::Float64::ConstPtr &ros_msg)
 {
     const UINT32 REAL_DATA_LEN = sizeof(double);
     const UINT32 DATA_LEN = CRC16_BYTES + REAL_DATA_LEN;
     const UINT32 MSG_LEN = MSG_HEAD_STRUCT_LEN + DATA_LEN;
-    
+
     char msg[MSG_LEN];
-    MsgHead *pMsg = (MsgHead *)msg;    
+    MsgHead *pMsg = (MsgHead *)msg;
     pMsg->identity1 = MSG_IDENTITY1;
     pMsg->identity2 = MSG_IDENTITY2;
     pMsg->len = MSG_DATA_START_LEN + DATA_LEN;
@@ -448,20 +443,20 @@ void SerialPortSend::send_lidar_nav_reset_max_vel_cmd(const std_msgs::Float64::C
     double &refVal = *((double *)pMsg->data);
     refVal = ros_msg->data;
 
-    UINT16 &refCrc = *((UINT16*)&pMsg->data[REAL_DATA_LEN]);
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
     refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
 
-    AddMsgToSendBuffer( string(&msg[0], &msg[MSG_LEN]) );
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
 }
 
-void SerialPortSend::send_lidar_nav_change_mode_cmd(const std_msgs::UInt8::ConstPtr& ros_msg)
+void SerialPortSend::send_lidar_nav_change_mode_cmd(const std_msgs::UInt8::ConstPtr &ros_msg)
 {
     const UINT32 REAL_DATA_LEN = sizeof(UINT8);
     const UINT32 DATA_LEN = CRC16_BYTES + REAL_DATA_LEN;
     const UINT32 MSG_LEN = MSG_HEAD_STRUCT_LEN + DATA_LEN;
-    
+
     char msg[MSG_LEN];
-    MsgHead *pMsg = (MsgHead *)msg;    
+    MsgHead *pMsg = (MsgHead *)msg;
     pMsg->identity1 = MSG_IDENTITY1;
     pMsg->identity2 = MSG_IDENTITY2;
     pMsg->len = MSG_DATA_START_LEN + DATA_LEN;
@@ -471,27 +466,83 @@ void SerialPortSend::send_lidar_nav_change_mode_cmd(const std_msgs::UInt8::Const
     UINT8 &refVal = *((UINT8 *)pMsg->data);
     refVal = ros_msg->data;
 
-    UINT16 &refCrc = *((UINT16*)&pMsg->data[REAL_DATA_LEN]);
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
     refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
 
-    AddMsgToSendBuffer( string(&msg[0], &msg[MSG_LEN]) );
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
 }
 
+void SerialPortSend::send_landing_info_cmd(const std_msgs::String::ConstPtr &ros_msg)
+{
+    const UINT32 REAL_DATA_LEN = sizeof(INT32) * 5;
+    const UINT32 DATA_LEN = CRC16_BYTES + REAL_DATA_LEN;
+    const UINT32 MSG_LEN = MSG_HEAD_STRUCT_LEN + DATA_LEN;
+
+    char msg[MSG_LEN];
+    MsgHead *pMsg = (MsgHead *)msg;
+    pMsg->identity1 = MSG_IDENTITY1;
+    pMsg->identity2 = MSG_IDENTITY2;
+    pMsg->len = MSG_DATA_START_LEN + DATA_LEN;
+    pMsg->direction = GROUND_STATION_TO_FLIGHT;
+    pMsg->type = MESSAGE_ANALYSIS_SEND_LANDING_INFO;
+
+    vector<string> recvData = split(ros_msg->data, " ");
+    float isDectected77 = stof(recvData[0]);
+    float isDectected78 = stof(recvData[5]);
+    float isDectected, xCmd, yCmd, zCmd, yawCmd;
+
+    if (isDectected78 == 1)
+    {
+        isDectected = isDectected78;
+        xCmd = stof(recvData[6]);
+        yCmd = stof(recvData[7]);
+        zCmd = stof(recvData[8]);
+        yawCmd = stof(recvData[9]);
+    }
+    else
+    {
+        isDectected = isDectected77;
+        xCmd = stof(recvData[1]);
+        yCmd = stof(recvData[2]);
+        zCmd = stof(recvData[3]);
+        yawCmd = stof(recvData[4]);
+    }
+
+    INT32 &cur = *((INT32 *)&pMsg->data[0 * sizeof(INT32)]);
+    cur = (INT32)(isDectected * 1e6);
+    cur = *((INT32 *)&pMsg->data[1 * sizeof(INT32)]);
+    cur = (INT32)(xCmd * 1e6);
+    cur = *((INT32 *)&pMsg->data[2 * sizeof(INT32)]);
+    cur = (INT32)(yCmd * 1e6);
+    cur = *((INT32 *)&pMsg->data[3 * sizeof(INT32)]);
+    cur = (INT32)(zCmd * 1e6);
+    cur = *((INT32 *)&pMsg->data[4 * sizeof(INT32)]);
+    cur = (INT32)(yawCmd * 1e6);
+    ROS_INFO("xVel is : %d,yVel is : %d,yawCmd is : %d,high is : %d", xCmd, yCmd, yawCmd, zCmd);
+
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
+    refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
+
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
+}
 
 //向串口发送数据到buffer为空为止
 void SerialPortSend::SendBufferQueueToSerialPort()
 {
-    while ( ! is_send_buffer_queue_empty() )
+    while (!is_send_buffer_queue_empty())
     {
         pthread_mutex_lock(&send_buffer_queue_lock);
         string tmpstr = send_buffer_queue.front();
         send_buffer_queue.pop();
         pthread_mutex_unlock(&send_buffer_queue_lock);
 
-        if ( (UINT8)tmpstr[MSG_TYPE_POS] == (UINT8)MESSAGE_ANALYSIS_HEART_BEAT ) {
+        if ((UINT8)tmpstr[MSG_TYPE_POS] == (UINT8)MESSAGE_ANALYSIS_HEART_BEAT)
+        {
             //心跳信息就不打印了，否则日志太多了
             ROS_INFO("send heart beat msg.");
-        } else {
+        }
+        else
+        {
             ROS_INFO("send msg_buf: ");
             PRINT_STRING_TO_BINARY(tmpstr);
         }
@@ -500,9 +551,9 @@ void SerialPortSend::SendBufferQueueToSerialPort()
     }
 }
 
-void* SerialPortSend::thread_loop(void* arg)
+void *SerialPortSend::thread_loop(void *arg)
 {
-    while(true)
+    while (true)
     {
         SendBufferQueueToSerialPort();
     }
@@ -513,5 +564,3 @@ void SerialPortSend::init(void)
     //初始化锁
     pthread_mutex_init(&send_buffer_queue_lock, NULL);
 }
-
-

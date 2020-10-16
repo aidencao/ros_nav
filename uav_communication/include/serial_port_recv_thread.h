@@ -25,7 +25,8 @@ private:
     static void PubDroneUavLocalPosition(const MsgHead *pMsg);
     static void PubDroneLidarNavRelativePosition(const MsgHead *pMsg);
     static void PubDroneLidarNavComputedVelocity(const MsgHead *pMsg);
-    static void PubDroneLidarNavOdom(const MsgHead *pMsg);    
+    static void PubDroneLidarNavOdom(const MsgHead *pMsg); 
+    static void PubLandingInfo(const MsgHead *pMsg);  
     static void MessageAnalysis(const MsgHead *pMsg);           //分析一帧
     static void RecvMsgFromSerialAndAnalyze(void);              //获取完整一帧
 };
