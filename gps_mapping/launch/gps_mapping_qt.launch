@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <launch>
+    <arg name="box_size" default = "3" />
+
     <node pkg="gps_mapping" type="point_marker.py" name="gps_mapping_node" output="screen">
         <param name="file_path" type="string" value="/home/cjz/nav_ws/src/gps_mapping/src/test_7.14.txt"/>
-        <param name="box_size" type="double" value="30"/>
+        <param name="box_size" type="double" value="$(arg box_size)"/>
     </node>
 </launch>

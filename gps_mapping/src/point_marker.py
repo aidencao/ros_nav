@@ -23,14 +23,16 @@ current_path = False
 point_count = 0
 
 
-#用于获取水平面的高度
+# 用于获取水平面的高度
 global horizontal_altitude
 horizontal_altitude = 0
-#用于保证只有刚开始打开时才能修改水平面高度
-global flag 
+# 用于保证只有刚开始打开时才能修改水平面高度
+global flag
 flag = False
 
-#移动灰色mark之后的操作
+# 移动灰色mark之后的操作
+
+
 def moveFeedback(feedback):
     cleanPath()
     p = feedback.pose.position
@@ -53,7 +55,6 @@ def normalizeQuaternion(quaternion_msg):
 
 
 def createNewPoint(frame_id, x, y, seq):
-
 
     print("createNewPoint----------------------------------0916")
 
@@ -145,7 +146,7 @@ def setOdomCallback(data):
 
     marker = server.get("-1")
 
-    #为服务器创建一个交互式标记
+    # 为服务器创建一个交互式标记
     if marker == None:
         int_marker = InteractiveMarker()
         int_marker.header.frame_id = frame_id
@@ -160,8 +161,7 @@ def setOdomCallback(data):
         int_marker.scale = marker_size
 
 
-
-#定义一个盒子的对象，并设置其长宽高和颜色。
+# 定义一个盒子的对象，并设置其长宽高和颜色。
         box_marker = Marker()
         box_marker.type = Marker.CUBE
         box_marker.scale.x = box_size
@@ -172,13 +172,10 @@ def setOdomCallback(data):
         box_marker.color.b = 0.5
         box_marker.color.a = 1.0
 
-
-    #创建一个包含框的非交互式控件
+    # 创建一个包含框的非交互式控件
         box_control = InteractiveMarkerControl()
         box_control.interaction_mode = InteractiveMarkerControl.BUTTON
         box_control.always_visible = True
-
-
 
         box_control.markers.append(box_marker)
 
@@ -201,21 +198,23 @@ def setOdomCallback(data):
 
 # 通过GPS获取当前位置
 # 通过GPS获取当前位置
+
+
 def setGPSCallback(data):
-    global flag 
+    global flag
     global horizontal_altitude
 
     if(data.status.status == -1):
-        return;
+        return
     global server, menu_handler, marker_size, box_size
     lat = data.latitude
     lon = data.longitude
 
-    #用于实地测试时的数据
-    #z=data.altitude-610.516967
-    #用于DJI仿真环境的测试数据
-    
-    #print("Z---z=data.altitude-610.516967")
+    # 用于实地测试时的数据
+    # z=data.altitude-610.516967
+    # 用于DJI仿真环境的测试数据
+
+    # print("Z---z=data.altitude-610.516967")
 
     marker = server.get("-1")
     if marker == None:
@@ -233,7 +232,7 @@ def setGPSCallback(data):
         z = data.altitude - horizontal_altitude
 
         print("当前点的X、Y、Z坐标为")
-        print(x,y,z)
+        print(x, y, z)
         int_marker.description = "id:" + str(-1) + " x:"+str(x) + " y:" + \
             str(y) + " z:" + str(z) + " lat:" + str(lat) + "  lon:" + str(lon)
 
@@ -252,12 +251,10 @@ def setGPSCallback(data):
         #box_marker.color.b = 0.5
         #box_marker.color.a = 1.0
 
-
         box_marker.color.r = 1.0
         box_marker.color.g = 1.0
         box_marker.color.b = 1.0
         box_marker.color.a = 1.0
-        
 
         box_control = InteractiveMarkerControl()
         box_control.interaction_mode = InteractiveMarkerControl.BUTTON
@@ -274,7 +271,7 @@ def setGPSCallback(data):
     else:
         x, y = getXYZ(lat, lon)
         z = data.altitude - horizontal_altitude
-        #print(x,y)
+        # print(x,y)
         marker.pose.position.x = x
         marker.pose.position.y = y
         marker.pose.position.z = z
@@ -303,11 +300,8 @@ def menuShowPointsCallback(feedback):
         marker = server.marker_contexts[key].int_marker
         print("编号：" + key + " x:" + str(marker.pose.position.x) + " y:" +
               str(marker.pose.position.y) + " z:" +
-              str(marker.pose.position.z) )
-        
+              str(marker.pose.position.z))
 
-
-        
     print("\n")
 
 
@@ -367,8 +361,6 @@ def initMenu():
     # menu_handler.insert("设为导航起点", callback=menuSetStartCallback)
     # menu_handler.insert("设为导航终点", callback=menuSetGoalCallback)
 
-
-
     menu_handler.insert("转换为GPS路径，通过串口发送", callback=sendGpsWaypoints)
     menu_handler.insert("通过串口直接发送地图坐标", callback=sendXYZWaypoints)
 
@@ -425,9 +417,8 @@ def transGPS(path):  # 将规划出的路径转换为GPS信息
         gps_divid = "@"
         lat, lon = getGps(point.pose.position.x, point.pose.position.y)
         gps_point_seq = (str(lat), str(lon), str(point.pose.position.z))
-        
-        #print("---------test8.3------lat:" + str(lat) + "  lon:" + str(lon))
 
+        #print("---------test8.3------lat:" + str(lat) + "  lon:" + str(lon))
 
         waypoints_seq.append(gps_divid.join(gps_point_seq))
 
@@ -441,8 +432,6 @@ def getPathCallback(data):
     else:
         current_path = data
 
-
-        
 
 # 测试GPS映射是否满意
 
@@ -513,14 +502,9 @@ def menuSendPointsCallback(data):  # 发送巡航点
 
     for key in sorted(server.marker_contexts):
 
-
-
         marker = server.marker_contexts[key].int_marker
 
-
         pose = PoseStamped()
-
-
 
         pose.pose.position.x = marker.pose.position.x
         pose.pose.position.y = marker.pose.position.y
@@ -533,7 +517,7 @@ def menuSendPointsCallback(data):  # 发送巡航点
 
         nav_path.poses.append(pose)
 
-    nav_pub.publish(nav_path)      #发布消息
+    nav_pub.publish(nav_path)  # 发布消息
     cleanPath()
 
 
@@ -547,7 +531,7 @@ def sendGpsWaypoints(data):
     if current_path != False:
         waypoints_msg = transGPS(current_path)
         gps_pub.publish(waypoints_msg)
-        print("sendGpsWaypoints 转换出来的path为" )      
+        print("sendGpsWaypoints 转换出来的path为")
     else:
         rospy.logwarn("当前还未有已生成的路径")
 
@@ -561,14 +545,10 @@ def sendXYZWaypoints(data):
         rospy.logwarn("当前还未有已生成的路径")
 
 
-
-
 def menuActivation(data):
-        a = "Activation" #用于触发激活GPS功能
-        Activation_pub.publish(a)
-        print("menuActivation 成功执行")
-
-
+    a = "Activation"  # 用于触发激活GPS功能
+    Activation_pub.publish(a)
+    print("menuActivation 成功执行")
 
 
 if __name__ == '__main__':
@@ -576,127 +556,75 @@ if __name__ == '__main__':
         rospy.init_node("point_marker_node")
         rospy.loginfo("Starting point_marker")
 
+        # 参数都可以通过launch文件修改
 
-
-        #参数都可以通过launch文件修改
-        # 获取标定点参数
-        x1 = rospy.get_param("gps_mapping_node/x1", 2)
-        y1 = rospy.get_param("gps_mapping_node/y1", 2)
-        x2 = rospy.get_param("gps_mapping_node/x2", 2)
-        y2 = rospy.get_param("gps_mapping_node/y2", 2)
-        lat1 = rospy.get_param("gps_mapping_node/lat1", 2)
-        lon1 = rospy.get_param("gps_mapping_node/lon1", 2)
-        lat2 = rospy.get_param("gps_mapping_node/lat2", 2)
-        lon2 = rospy.get_param("gps_mapping_node/lon2", 2)
-
-
-
-
-
-
-        marker_size = rospy.get_param("gps_mapping_node/marker_size", 4.5)
         box_size = rospy.get_param("gps_mapping_node/box_size", 3)
-
-
+        marker_size = box_size*1.5
 
         file_path = rospy.get_param(
             "gps_mapping_node/file_path", "/home/cjz/nav_ws/src/gps_mapping/src/test_7.14.txt")
 
-            #"gps_mapping_node/file_path", "${workspaceFolder}/src/gps_mapping/src/test.txt"
-	
-
-
-
-
-
-
+        #"gps_mapping_node/file_path", "${workspaceFolder}/src/gps_mapping/src/test.txt"
 
         # 判断标定点是否合法      数据手动输入，一定合法，后续可考虑改进，目前不需要。
-        if checkParam(x1, x2, y1, y2, lat1, lat2, lon1, lon2):
-            #     a_lat, b_lat = x_latitudeMapping(x1, lat1, x2, lat2)
-            #     a_lon, b_lon = y_longitudeMapping(y1, lon1, y2, lon2)
-            a_lat, b_lat, a_lon, b_lon, a_x, b_x, a_y, b_y, point0 = GPS_Point.avg_mapping(GPS_Point.readPoint(file_path))
+        # if checkParam(x1, x2, y1, y2, lat1, lat2, lon1, lon2):
+        #     a_lat, b_lat = x_latitudeMapping(x1, lat1, x2, lat2)
+        #     a_lon, b_lon = y_longitudeMapping(y1, lon1, y2, lon2)
+        a_lat, b_lat, a_lon, b_lon, a_x, b_x, a_y, b_y, point0 = GPS_Point.avg_mapping(
+            GPS_Point.readPoint(file_path))
 
+        # 关注标点相关主题
+        rospy.Subscriber("goal",
+                         PoseStamped,
+                         showPointCallback,
+                         queue_size=1)
 
+        rospy.Subscriber("nav/waypoints",
+                         Path,
+                         getPathCallback,
+                         queue_size=1)
 
+        rospy.Subscriber("gps_point_cmd",
+                         String,
+                         setHighCallback,
+                         queue_size=1)
 
+        rospy.Subscriber("odom", Odometry, setOdomCallback, queue_size=1)
 
+        rospy.Subscriber("raw_fix", NavSatFix,
+                         setGPSCallback, queue_size=1)
 
-            # 关注标点相关主题
-            rospy.Subscriber("goal",
-                             PoseStamped,
-                             showPointCallback,
-                             queue_size=1)
+        # start_pub = rospy.Publisher(
+        #     'nav/start', PointStamped, queue_size=1)
+        # goal_pub = rospy.Publisher('nav/goal', PointStamped, queue_size=1)
 
-            rospy.Subscriber("nav/waypoints",
-                             Path,
-                             getPathCallback,
-                             queue_size=1)
+        gps_pub = rospy.Publisher("gps/path", String,
+                                  queue_size=1)  # 用于向串口发送GPS路径
 
-            rospy.Subscriber("gps_point_cmd",
-                             String,
-                             setHighCallback,
-                             queue_size=1)
+        nav_pub = rospy.Publisher("path/waypoints", Path,
+                                  queue_size=1)  # 发送路径规划锚点
 
-            rospy.Subscriber("odom", Odometry, setOdomCallback, queue_size=1)
-            
-            
-     
+        traj_pub = rospy.Publisher("nav/waypoints", Path,
+                                   queue_size=1)  # 用于将规划好的路径清空
 
+        xyz_pub = rospy.Publisher("xyz/path", Path,
+                                  queue_size=1)  # 用于向串口发送地图坐标路径
 
-            rospy.Subscriber("raw_fix", NavSatFix, setGPSCallback, queue_size=1)
+        Activation_pub = rospy.Publisher("Activation", String,
+                                         queue_size=1)  # 用于激活GPS
 
-            # start_pub = rospy.Publisher(
-            #     'nav/start', PointStamped, queue_size=1)
-            # goal_pub = rospy.Publisher('nav/goal', PointStamped, queue_size=1)
+        # 创建交互式标记服务，命名空间为nav_points
+        server = InteractiveMarkerServer("nav_points")
 
+        initMenu()
 
+        # testGpsMapping()
+        # testXYZMapping()
 
-            gps_pub = rospy.Publisher("gps/path", String,
-                                      queue_size=1)  # 用于向串口发送GPS路径
+        # 关闭前清除标记
+        rospy.on_shutdown(cleanPath)
 
+        rospy.spin()
 
-
- 
-            nav_pub = rospy.Publisher("path/waypoints", Path,
-                                      queue_size=1)  # 发送路径规划锚点
-
-
-
-            traj_pub = rospy.Publisher("nav/waypoints", Path,
-                                       queue_size=1)  # 用于将规划好的路径清空
-
-
-
-
-            xyz_pub = rospy.Publisher("xyz/path", Path,
-                                      queue_size=1)  # 用于向串口发送地图坐标路径
-
-            
-            Activation_pub = rospy.Publisher("Activation",String,
-                                        queue_size=1)   #用于激活GPS
-
-
-            
-
-
-
-
-
-            # 创建交互式标记服务，命名空间为nav_points
-            server = InteractiveMarkerServer("nav_points")
-
-            initMenu()
-
-            testGpsMapping()
-            testXYZMapping()
-
-            # 关闭前清除标记
-            rospy.on_shutdown(cleanPath)
-
-            rospy.spin()
-        else:
-            rospy.logerr("输入参数非法")
     except KeyboardInterrupt:
         print("Shutting down point_marker")
-        
