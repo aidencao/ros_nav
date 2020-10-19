@@ -6,4 +6,6 @@
         <param name="file_path" type="string" value="/home/cjz/nav_ws/src/gps_mapping/src/test_7.14.txt"/>
         <param name="box_size" type="double" value="$(arg box_size)"/>
     </node>
+
+    <node pkg="rviz" type="rviz" name="$(anon rviz)" respawn="false" output="screen" args="-d $(find publish_pointcloud)/rviz/OctomapShow.rviz"/>
 </launch>
