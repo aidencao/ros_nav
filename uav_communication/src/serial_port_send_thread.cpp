@@ -491,6 +491,12 @@ void SerialPortSend::send_landing_info_cmd(const std_msgs::String::ConstPtr &ros
     float isDectected78 = stof(recvData[5]);
     float isDectected, xCmd, yCmd, zCmd, yawCmd;
 
+    isDectected = isDectected77;
+    xCmd = stof(recvData[1]);
+    yCmd = stof(recvData[2]);
+    zCmd = stof(recvData[3]);
+    yawCmd = stof(recvData[4]);
+
     if (isDectected78 == 1)
     {
         isDectected = isDectected78;
@@ -499,26 +505,18 @@ void SerialPortSend::send_landing_info_cmd(const std_msgs::String::ConstPtr &ros
         zCmd = stof(recvData[8]);
         yawCmd = stof(recvData[9]);
     }
-    else
-    {
-        isDectected = isDectected77;
-        xCmd = stof(recvData[1]);
-        yCmd = stof(recvData[2]);
-        zCmd = stof(recvData[3]);
-        yawCmd = stof(recvData[4]);
-    }
 
-    INT32 &cur = *((INT32 *)&pMsg->data[0 * sizeof(INT32)]);
-    cur = (INT32)(isDectected * 1e6);
-    cur = *((INT32 *)&pMsg->data[1 * sizeof(INT32)]);
-    cur = (INT32)(xCmd * 1e6);
-    cur = *((INT32 *)&pMsg->data[2 * sizeof(INT32)]);
-    cur = (INT32)(yCmd * 1e6);
-    cur = *((INT32 *)&pMsg->data[3 * sizeof(INT32)]);
-    cur = (INT32)(zCmd * 1e6);
-    cur = *((INT32 *)&pMsg->data[4 * sizeof(INT32)]);
-    cur = (INT32)(yawCmd * 1e6);
-    ROS_INFO("xVel is : %d,yVel is : %d,yawCmd is : %d,high is : %d", xCmd, yCmd, yawCmd, zCmd);
+    INT32 &dcur = *((INT32 *)&pMsg->data[0 * sizeof(INT32)]);
+    dcur = (INT32)(isDectected * 1e6);
+    INT32 &xcur = *((INT32 *)&pMsg->data[1 * sizeof(INT32)]);
+    xcur = (INT32)(xCmd * 1e6);
+    INT32 &ycur = *((INT32 *)&pMsg->data[2 * sizeof(INT32)]);
+    ycur = (INT32)(yCmd * 1e6);
+    INT32 &zcur = *((INT32 *)&pMsg->data[3 * sizeof(INT32)]);
+    zcur = (INT32)(zCmd * 1e6);
+    INT32 &yawcur = *((INT32 *)&pMsg->data[4 * sizeof(INT32)]);
+    yawcur = (INT32)(yawCmd * 1e6);
+    ROS_INFO("xVel is : %f,yVel is : %f,yawCmd is : %f,high is : %f", xCmd, yCmd, yawCmd, zCmd);
 
     UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
     refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
