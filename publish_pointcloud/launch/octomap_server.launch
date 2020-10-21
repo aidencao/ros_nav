@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <!-- octo_map_server -->
+  <arg name="resolution" default = "5" />
+  <arg name="max_range" default = "500.0" />
+  <arg name="max_z" default = "200" />
+  <arg name="min_z" default = "-20" />
+
+  <!-- path_planner -->
+  <arg name="uavl" default = "1" />
+  <arg name="uavw" default = "1" />
+  <arg name="uavh" default = "1" />
+  <arg name="bound_xy" default = "400.0" />
+  <arg name="bound_lowz" default = "0.0" />
+  <arg name="bound_highz" default = "100" />
+  <arg name="step_range" default = "1" />
+
+  <!-- gps_mapping -->
+  <arg name="box_size" default = "3" />
+
+  <!-- publish_map -->
+  <arg name="path" default = "$(find publish_pointcloud)/data/south_gate2.pcd" />
+
+
+  <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
+
+    <!-- resolution in meters per pixel -->
+    <param name="resolution" value="$(arg resolution)" />
+
+    <!-- name of the fixed frame, needs to be "/map" for SLAM -->
+    <param name="frame_id" type="string" value="/map" />
+
+    <!-- max range / depth resolution of the kinect in meter -->
+    <param name="sensor_model/max_range" value="$(arg max_range)" />
+    <param name="latch" value="true" />
+
+    <!-- max/min height for occupancy map, should be in meters -->
+    <param name="pointcloud_max_z" value="$(arg max_z)" />
+    <param name="pointcloud_min_z" value="$(arg min_z)" />
+
+    <!-- topic from where pointcloud2 messages are subscribed -->
+    <remap from="/cloud_in" to="/pointcloud/output" />
+
+  </node>
+  <include file="$(find path_planner)/launch/path_planner_qt.launch">
+    <arg name="uavl" value = "$(arg uavl)" />
+    <arg name="uavw" value = "$(arg uavw)" />
+    <arg name="uavh" value = "$(arg uavh)" />
+    <arg name="resolution" value = "$(arg resolution)" />
+    <arg name="bound_xy" value = "$(arg bound_xy)" />
+    <arg name="bound_lowz" value = "$(arg bound_lowz)" />
+    <arg name="bound_highz" value = "$(arg bound_highz)" />
+    <arg name="step_range" value = "$(arg step_range)" />
+  </include>
+  <include file="$(find gps_mapping)/launch/gps_mapping_qt.launch">
+    <arg name="box_size" value = "$(arg box_size)" />
+  </include>
+  <include file="$(find publish_pointcloud)/launch/publish_map.launch">
+    <arg name="path" default = "$(arg path)" />
+  </include>
+
+</launch>

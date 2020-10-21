@@ -1,31 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
-  <arg name="resolution" default = "5" />
-  <arg name="max_range" default = "500.0" />
-  <arg name="max_z" default = "200" />
-  <arg name="min_z" default = "-20" />
   <arg name="path" default = "$(find publish_pointcloud)/data/south_gate2.pcd" />
 
-  <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
-
-    <!-- resolution in meters per pixel -->
-    <param name="resolution" value="$(arg resolution)" />
-
-    <!-- name of the fixed frame, needs to be "/map" for SLAM -->
-    <param name="frame_id" type="string" value="/map" />
-
-    <!-- max range / depth resolution of the kinect in meter -->
-    <param name="sensor_model/max_range" value="$(arg max_range)" />
-    <param name="latch" value="true" />
-
-    <!-- max/min height for occupancy map, should be in meters -->
-    <param name="pointcloud_max_z" value="$(arg max_z)" />
-    <param name="pointcloud_min_z" value="$(arg min_z)" />
-
-    <!-- topic from where pointcloud2 messages are subscribed -->
-    <remap from="/cloud_in" to="/pointcloud/output" />
-
-  </node>
 
   <node name="publish_pointcloud" pkg="publish_pointcloud" type="publish_pointcloud">
     <param name="path" type="string" value="$(arg path)"/>
@@ -34,8 +10,5 @@
     <param name="hz" type="int" value="2"/>
     <param name="rotate_xyz" value="false"/>
   </node>
-
-  <!-- RViz -->
-  <node pkg="rviz" type="rviz" name="$(anon rviz)" respawn="false" output="screen" args="-d $(find publish_pointcloud)/rviz/OctomapShow.rviz"/>
 
 </launch>
