@@ -25,6 +25,7 @@ ros::Subscriber RosTopicSendRecv::land_sub;
 ros::Subscriber RosTopicSendRecv::gohome_sub;
 ros::Subscriber RosTopicSendRecv::halt_manifold_sub;
 ros::Subscriber RosTopicSendRecv::set_height_sub;
+ros::Subscriber RosTopicSendRecv::set_height_by_move_sub;
 ros::Subscriber RosTopicSendRecv::waypoints_cmd_sub;
 ros::Subscriber RosTopicSendRecv::xyz_cmd_sub;
 ros::Subscriber RosTopicSendRecv::move_base_simple_sub;
