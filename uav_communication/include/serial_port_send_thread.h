@@ -21,6 +21,7 @@ public:
     static void send_takeoff_cmd(const std_msgs::Bool::ConstPtr &ros_msg);
     static void send_land_cmd(const std_msgs::Bool::ConstPtr &ros_msg);
     static void send_resetHeight_cmd(const std_msgs::Float64::ConstPtr &ros_msg);
+    static void send_setHeight_by_move_cmd(const std_msgs::Float64::ConstPtr &ros_msg);
     static void send_stop_move_cmd(const std_msgs::Bool::ConstPtr &ros_msg);
     static void send_haltManifold_cmd(const std_msgs::Bool::ConstPtr &ros_msg);
     static void send_gohome_cmd(const std_msgs::Bool::ConstPtr &ros_msg);

@@ -129,6 +129,7 @@ void RosTopicSendRecv::init(void)
     gohome_sub = nh.subscribe("/uav_gohome", 1, &SerialPortSend::send_gohome_cmd);
     halt_manifold_sub = nh.subscribe("/uav_halt_manifold", 1, &SerialPortSend::send_haltManifold_cmd);
     set_height_sub = nh.subscribe<std_msgs::Float64>("/set_uav_height", 1, &SerialPortSend::send_resetHeight_cmd);
+    set_height_by_move_sub = nh.subscribe<std_msgs::Float64>("/set_uav_height_by_move", 1, &SerialPortSend::send_setHeight_by_move_cmd);
     waypoints_cmd_sub = nh.subscribe("gps/path", 1, &SerialPortSend::send_waypoints_cmd);
     xyz_cmd_sub = nh.subscribe("xyz/path", 1, &SerialPortSend::send_xyz_path_cmd);
     stop_move_sub = nh.subscribe<std_msgs::Bool>("/stop_move_flag", 1, &SerialPortSend::send_stop_move_cmd);

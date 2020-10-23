@@ -53,6 +53,7 @@ private:
     static ros::Subscriber gohome_sub;
     static ros::Subscriber halt_manifold_sub;
     static ros::Subscriber set_height_sub;
+    static ros::Subscriber set_height_by_move_sub;
     static ros::Subscriber waypoints_cmd_sub;
     static ros::Subscriber xyz_cmd_sub;
     static ros::Subscriber move_base_simple_sub;

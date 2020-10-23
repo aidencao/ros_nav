@@ -194,6 +194,29 @@ void SerialPortSend::send_resetHeight_cmd(const std_msgs::Float64::ConstPtr &ros
     AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
 }
 
+void SerialPortSend::send_setHeight_by_move_cmd(const std_msgs::Float64::ConstPtr &ros_msg)
+{
+    const UINT32 REAL_DATA_LEN = sizeof(double);
+    const UINT32 DATA_LEN = CRC16_BYTES + REAL_DATA_LEN;
+    const UINT32 MSG_LEN = MSG_HEAD_STRUCT_LEN + DATA_LEN;
+
+    char msg[MSG_LEN];
+    MsgHead *pMsg = (MsgHead *)msg;
+    pMsg->identity1 = MSG_IDENTITY1;
+    pMsg->identity2 = MSG_IDENTITY2;
+    pMsg->len = MSG_DATA_START_LEN + DATA_LEN;
+    pMsg->direction = GROUND_STATION_TO_FLIGHT;
+    pMsg->type = MESSAGE_ANALYSIS_SET_ALTITUDE_BY_MOVE;
+
+    double &refVal = *((double *)pMsg->data);
+    refVal = ros_msg->data;
+
+    UINT16 &refCrc = *((UINT16 *)&pMsg->data[REAL_DATA_LEN]);
+    refCrc = crc16(&msg[SND_MSG_HEAD_LEN], MSG_DATA_START_LEN + REAL_DATA_LEN);
+
+    AddMsgToSendBuffer(string(&msg[0], &msg[MSG_LEN]));
+}
+
 void SerialPortSend::SendHeartBeatMsg(void)
 {
     const UINT32 REAL_DATA_LEN = 0;
