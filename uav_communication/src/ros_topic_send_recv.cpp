@@ -39,6 +39,8 @@ ros::Subscriber RosTopicSendRecv::reset_lidar_nav_max_vel_sub;
 ros::Subscriber RosTopicSendRecv::change_lidar_nav_fligt_mode_sub;
 ros::Subscriber RosTopicSendRecv::landing_info_sub;
 ros::Subscriber RosTopicSendRecv::landing_start_sub;
+ros::Subscriber RosTopicSendRecv::record_map_start_sub;
+ros::Subscriber RosTopicSendRecv::record_map_end_sub;
 
 //发布日志信息给Qt
 void RosTopicSendRecv::pub_uav_log_info(const string &loginfo)
@@ -144,4 +146,7 @@ void RosTopicSendRecv::init(void)
     //降落sub
     landing_info_sub = nh.subscribe("/landing_send", 1, SerialPortSend::send_landing_info_cmd);
     landing_start_sub = nh.subscribe("/qt_landing_start", 1, SerialPortSend::send_landing_start_cmd);
+    //录包sub
+    record_map_start_sub = nh.subscribe("/record_map_start", 1, SerialPortSend::send_record_start_info_cmd);
+    record_map_end_sub = nh.subscribe("/record_map_end", 1, SerialPortSend::send_record_end_info_cmd);
 }

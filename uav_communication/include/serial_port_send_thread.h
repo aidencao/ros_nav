@@ -37,6 +37,8 @@ public:
     static void send_lidar_nav_change_mode_cmd(const std_msgs::UInt8::ConstPtr &ros_msg);
     static void send_landing_info_cmd(const std_msgs::String::ConstPtr &ros_msg);
     static void send_landing_start_cmd(const std_msgs::Bool::ConstPtr &ros_msg);
+    static void send_record_start_info_cmd(const std_msgs::Bool::ConstPtr &ros_msg);
+    static void send_record_end_info_cmd(const std_msgs::Bool::ConstPtr &ros_msg);
 
 private:
     SerialPortSend();
