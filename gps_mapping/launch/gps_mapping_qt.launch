@@ -3,7 +3,7 @@
     <arg name="box_size" default = "3" />
 
     <node pkg="gps_mapping" type="point_marker.py" name="gps_mapping_node" output="screen">
-        <param name="file_path" type="string" value="/home/cjz/nav_ws/src/gps_mapping/src/test_7.14.txt"/>
+        <param name="file_dir" value="$(find gps_mapping)/src" />
         <param name="box_size" type="double" value="$(arg box_size)"/>
     </node>
 

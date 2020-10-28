@@ -3,6 +3,7 @@
 import rospy
 import GPS_Point
 import os
+import json
 
 
 from geometry_msgs.msg import PoseStamped
@@ -54,7 +55,7 @@ def normalizeQuaternion(quaternion_msg):
     quaternion_msg.w *= s
 
 
-def createNewPoint(frame_id, x, y, seq):
+def createNewPoint(frame_id, x, y, z):
 
     print("createNewPoint----------------------------------0916")
 
@@ -70,7 +71,7 @@ def createNewPoint(frame_id, x, y, seq):
     int_marker.pose.position.x = x
     int_marker.pose.position.y = y
 
-    int_marker.pose.position.z = 5
+    int_marker.pose.position.z = z
     int_marker.scale = marker_size
 
     box_marker = Marker()
@@ -133,7 +134,7 @@ def createNewPoint(frame_id, x, y, seq):
 
 def showPointCallback(data):
     createNewPoint(data.header.frame_id, data.pose.position.x,
-                   data.pose.position.y, data.header.seq)
+                   data.pose.position.y, 5)
 
 
 # 获取当前位置
@@ -305,6 +306,41 @@ def menuShowPointsCallback(feedback):
     print("\n")
 
 
+def menuSavePointsCallback(feedback):
+    global file_dir
+
+    points = []
+    for key in sorted(server.marker_contexts):
+        marker = server.marker_contexts[key].int_marker
+        if key != "-1":
+            point = {'key': key, 'x': marker.pose.position.x,
+                     'y': marker.pose.position.y, 'z': marker.pose.position.z}
+            points.append(point)
+            print(point)
+
+    if points != []:
+        path = file_dir+"/waypoints.txt"
+        with open(path, 'w') as f:
+            f.write(json.dumps(points))
+        print("保存成功")
+    else:
+        print("路径点为空")
+
+
+def menuLoadPointsCallback(feedback):
+    global file_dir
+    path = file_dir+"/waypoints.txt"
+
+    points = []
+    with open(path, "r") as file:
+        strdata = file.read()
+        points = json.loads(strdata)
+
+    menuResetPointsCallback(points)
+    for point in sorted(points):
+        createNewPoint("map",point['x'],point['y'],point['z'])
+
+
 def cleanPath():  # 清空路径
     global current_path
 
@@ -365,6 +401,8 @@ def initMenu():
     menu_handler.insert("通过串口直接发送地图坐标", callback=sendXYZWaypoints)
 
     menu_handler.insert("GPS激活", callback=menuActivation)
+    menu_handler.insert("保存路径点", callback=menuSavePointsCallback)
+    menu_handler.insert("加载路径点", callback=menuLoadPointsCallback)
 
 
 ##############################################################################
@@ -561,8 +599,8 @@ if __name__ == '__main__':
         box_size = rospy.get_param("gps_mapping_node/box_size", 3)
         marker_size = box_size*1.5
 
-        file_path = rospy.get_param(
-            "gps_mapping_node/file_path", "/home/cjz/nav_ws/src/gps_mapping/src/test_7.14.txt")
+        file_dir = rospy.get_param(
+            "gps_mapping_node/file_dir", "/home/cjz/nav_ws/src/gps_mapping/src")
 
         #"gps_mapping_node/file_path", "${workspaceFolder}/src/gps_mapping/src/test.txt"
 
@@ -570,6 +608,7 @@ if __name__ == '__main__':
         # if checkParam(x1, x2, y1, y2, lat1, lat2, lon1, lon2):
         #     a_lat, b_lat = x_latitudeMapping(x1, lat1, x2, lat2)
         #     a_lon, b_lon = y_longitudeMapping(y1, lon1, y2, lon2)
+        file_path = file_dir+"/test_7.14.txt"
         a_lat, b_lat, a_lon, b_lon, a_x, b_x, a_y, b_y, point0 = GPS_Point.avg_mapping(
             GPS_Point.readPoint(file_path))
 
